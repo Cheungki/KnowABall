@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="comsoftware.engine.mapper.PlayerMapper">
+    <select id="getPlayerBaseInfo" resultType="comsoftware.engine.entity.PlayerBaseInfo">
+        select *
+        from `PlayerBaseInfo`
+        where `id` = #{id};
+    </select>
+
+    <select id="getPlayerInjuredData" resultType="comsoftware.engine.entity.PlayerInjuredData">
+        select *
+        from `PlayerInjuredData`
+        where `playerId` = #{id};
+    </select>
+
+    <select id="getPlayerMatchData" resultType="comsoftware.engine.entity.PlayerMatchData">
+        select *
+        from `PlayerMatchData`
+        where `playerId` = #{id};
+    </select>
+
+    <select id="getPlayerTransferData" resultType="comsoftware.engine.entity.PlayerTransferData">
+        select *
+        from `PlayerTransferData`
+        where `playerId` = #{id};
+    </select>
+</mapper>
