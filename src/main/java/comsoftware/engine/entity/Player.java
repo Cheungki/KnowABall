@@ -13,17 +13,41 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(indexName = "notice")
-public class Notice {
+@Document(indexName = "player")
+public class Player {
 
     //id
-    @JsonProperty("id")
     @Id
-    private Long id;
+    private int id;
 
     //标题
-    @JsonProperty("title")
     @Field(type = FieldType.Text)
     private String title;
+
+    private String url;
+
+    private String club;
+
+    private String country;
+
+    private String role;
+
+    private int height;
+
+    private int weight;
+
+    private int age;
+
+    private String number;
+
+    private String birthday;
+
+    private int foot;
+
+    private String name;
+
+    private String englishName;
+
+    private String capablity;
 
 }

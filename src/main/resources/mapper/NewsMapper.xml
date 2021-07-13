@@ -8,4 +8,10 @@
         where `playerId` = #{id};
     </select>
 
+    <select id="getNewsById" resultType="comsoftware.engine.entity.News">
+        select *
+        from `News`
+        where `id` = #{id};
+    </select>
+
 </mapper>

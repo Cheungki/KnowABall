@@ -1,5 +1,6 @@
 package comsoftware.engine.service;
 
+import comsoftware.engine.entity.News;
 import comsoftware.engine.entity.PlayerNewsTitles;
 import comsoftware.engine.mapper.NewsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,10 @@ public class NewsService {
 
     public List<PlayerNewsTitles> getPlayerHotNews(int id) {
         return newsMapper.getPlayerHotNews(id);
+    }
+
+    public News getNewsById(int id) {
+        return newsMapper.getNewsById(id);
     }
 
 }

@@ -1,12 +1,14 @@
 package comsoftware.engine.controller;
 
 import comsoftware.engine.entity.*;
-import comsoftware.engine.repository.NoticeRepository;
+import comsoftware.engine.repository.PlayerRepository;
 import comsoftware.engine.service.NewsService;
 import comsoftware.engine.service.PlayerService;
 import comsoftware.engine.service.TeamService;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +21,7 @@ import java.util.Optional;
 @RestController
 public class TestController {
     @Autowired
-    private NoticeRepository noticeRepository;
+    private PlayerRepository playerRepository;
 
     @Autowired
     private PlayerService playerService;
@@ -30,19 +32,27 @@ public class TestController {
     @Autowired
     private NewsService newsService;
 
+    static int MAX_RECORD = 10;
+
     @RequestMapping(value = "/test/hello", method = RequestMethod.GET)
     public String helloSearchEngine() {
         return "Hello World";
     }
 
     @RequestMapping(value = "/test/search", method = RequestMethod.GET)
-    public Iterable<Notice> search() {
-        return noticeRepository.findAll();
+    public Iterable<Player> search() {
+        return playerRepository.findAll();
     }
 
-    @RequestMapping(value = "/test/find/{query}", method = RequestMethod.GET)
-    public Optional<Notice> query(@PathVariable int query) {
-        return noticeRepository.findById((long) query);
+    @RequestMapping(value = "/test/find/{name}/{page}", method = RequestMethod.GET)
+    public Page<Player> query(@PathVariable String name, @PathVariable int page) {
+        Pageable pageable = PageRequest.of(page, MAX_RECORD);
+        return playerRepository.findNameFuzzy(name, pageable);
+    }
+
+    @RequestMapping(value = "/test/club/{club}", method = RequestMethod.GET)
+    public List<Player> findClub(@PathVariable String club) {
+        return playerRepository.findByClub(club);
     }
 
     @RequestMapping(value = "/test/player/{id}", method = RequestMethod.GET)
@@ -83,5 +93,15 @@ public class TestController {
     @RequestMapping(value = "/test/player/news/{id}", method = RequestMethod.GET)
     public List<PlayerNewsTitles> getPlayerHotNews(@PathVariable int id) {
         return newsService.getPlayerHotNews(id);
+    }
+
+    @RequestMapping(value = "/test/player/kg/{id}", method = RequestMethod.GET)
+    public List<Triple> getPlayerKnowledgeGraph(@PathVariable int id) {
+        return playerService.getPlayerKnowledgeGraph(id);
+    }
+
+    @RequestMapping(value = "/test/news/{id}", method = RequestMethod.GET)
+    public News getNewsById(@PathVariable int id) {
+        return newsService.getNewsById(id);
     }
 }
