@@ -2,6 +2,8 @@ package comsoftware.engine.controller;
 
 import comsoftware.engine.entity.*;
 import comsoftware.engine.repository.PlayerRepository;
+import comsoftware.engine.repository.NewsRepository;
+import comsoftware.engine.repository.TeamRepository;
 import comsoftware.engine.service.NewsService;
 import comsoftware.engine.service.PlayerService;
 import comsoftware.engine.service.TeamService;
@@ -12,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * 用于开发早期进行测试的类
@@ -22,6 +23,12 @@ import java.util.Optional;
 public class TestController {
     @Autowired
     private PlayerRepository playerRepository;
+
+    @Autowired
+    private NewsRepository newsRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Autowired
     private PlayerService playerService;
@@ -55,6 +62,41 @@ public class TestController {
         return playerRepository.findByClub(club);
     }
 
+    ////////////////////////////Team////////////////////////////////////////
+    @RequestMapping(value = "/testTeam/name/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<TeamBaseInfo> findTeamByName(@PathVariable String name) {
+        return teamRepository.findByName(name);
+    }
+
+    @RequestMapping(value = "/testTeam/nameLike/{name}", method = RequestMethod.GET)
+    public List<TeamBaseInfo> findTeamByNameLike(@PathVariable String name) {
+        return teamRepository.findByNameLike(name);
+    }
+
+    @RequestMapping(value = "/testTeam/id/{id}", method = RequestMethod.GET)
+    public List<TeamBaseInfo> findTeamById(@PathVariable int id) {
+        return teamRepository.findById(id);
+    }
+    ////////////////////////////////////////////////////////////////////////
+
+    ///////////////////////////News////////////////////////////////////////
+    @RequestMapping(value = "/testNews/tag/{tag}", method = RequestMethod.GET)
+    public List<News> findNewsByTag(@PathVariable String tag) {
+        return newsRepository.findByTags(tag);
+    }
+
+    @RequestMapping(value = "/testNews/id/{id}", method = RequestMethod.GET)
+    public List<News> findNewsById(@PathVariable int id) {
+        return newsRepository.findById(id);
+    }
+
+    @RequestMapping(value = "/testNews/content/{content}", method = RequestMethod.GET)
+    public List<News> findNewsByContent(@PathVariable String content) {
+        return newsRepository.findByContent(content);
+    }
+    ///////////////////////////////////////////////////////////////////////
+
     @RequestMapping(value = "/test/player/{id}", method = RequestMethod.GET)
     public PlayerBaseInfo getPlayer(@PathVariable int id) {
         return playerService.getPlayerBaseInfo(id);
@@ -66,6 +108,7 @@ public class TestController {
     }
 
     @RequestMapping(value = "/test/player/match/{id}", method = RequestMethod.GET)
+    @ResponseBody
     public List<PlayerMatchData> getPlayerMatchData(@PathVariable int id) {
         return playerService.getPlayerMatchData(id);
     }
@@ -92,7 +135,7 @@ public class TestController {
 
     @RequestMapping(value = "/test/player/news/{id}", method = RequestMethod.GET)
     public List<PlayerNewsTitles> getPlayerHotNews(@PathVariable int id) {
-        return newsService.getPlayerHotNews(id);
+        return playerService.getPlayerHotNews(id);
     }
 
     @RequestMapping(value = "/test/player/kg/{id}", method = RequestMethod.GET)

@@ -24,4 +24,16 @@
         from `PlayerTransferData`
         where `playerId` = #{id};
     </select>
+
+    <select id="getPlayerHotNews" resultType="comsoftware.engine.entity.PlayerNewsTitles">
+        select *
+        from `PlayerNewsTitles`
+        where `playerId` = #{id};
+    </select>
+
+    <select id="getPlayerImgURL" resultType="String">
+        select imgURL
+        from `playerImgURL`
+        where `playerId` = #{id};
+    </select>
 </mapper>

@@ -1,9 +1,6 @@
 package comsoftware.engine.mapper;
 
-import comsoftware.engine.entity.PlayerBaseInfo;
-import comsoftware.engine.entity.PlayerInjuredData;
-import comsoftware.engine.entity.PlayerMatchData;
-import comsoftware.engine.entity.PlayerTransferData;
+import comsoftware.engine.entity.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,4 +15,8 @@ public interface PlayerMapper {
     List<PlayerMatchData> getPlayerMatchData(int id);
 
     List<PlayerTransferData> getPlayerTransferData(int id);
+
+    List<PlayerNewsTitles> getPlayerHotNews(int id);
+
+    String getPlayerImgURL(int id);
 }

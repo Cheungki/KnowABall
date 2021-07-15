@@ -20,9 +20,9 @@ public class Player {
     @Id
     private int id;
 
-    //标题
-    @Field(type = FieldType.Text)
-    private String title;
+    private String imgURL;
+
+    private int teamId;
 
     private String url;
 

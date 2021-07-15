@@ -3,12 +3,15 @@ package comsoftware.engine.entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Document(indexName = "team")
 public class TeamBaseInfo {
-
+    @Id
     private int id;
 
     private String url;

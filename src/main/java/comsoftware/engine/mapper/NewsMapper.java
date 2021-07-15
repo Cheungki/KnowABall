@@ -9,8 +9,6 @@ import java.util.List;
 @Repository
 public interface NewsMapper {
 
-    List<PlayerNewsTitles> getPlayerHotNews(int id);
-
     News getNewsById(int id);
 
 }
