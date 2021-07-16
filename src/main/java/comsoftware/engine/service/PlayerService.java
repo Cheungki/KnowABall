@@ -87,4 +87,8 @@ public class PlayerService {
         return result;
     }
 
+    public List<HotWord> getPlayerHotWords(int id) {
+        return playerMapper.getPlayerHotWords(id);
+    }
+
 }
