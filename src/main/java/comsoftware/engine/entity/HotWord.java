@@ -8,23 +8,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HotWord {
-    private String word;
+    private String text;
 
-    private int count;
+    private int value;
 
-    public String getWord() {
-        return word;
+    public String getText() {
+        return text;
     }
 
-    public int getCount() {
-        return count;
+    public int getValue() {
+        return value;
     }
 
-    public void setWord(String word) {
-        this.word = word;
+    public void setText(String text) {
+        this.text = text;
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    public void setValue(int value) {
+        this.value = value;
     }
 }

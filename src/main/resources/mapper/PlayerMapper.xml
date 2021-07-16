@@ -38,7 +38,7 @@
     </select>
 
     <select id="getPlayerHotWords" resultType="comsoftware.engine.entity.HotWord">
-        select `word`, `count`
+        select `word` as text, `count` as value
         from `PlayerWord`
         where id = #{id};
     </select>
