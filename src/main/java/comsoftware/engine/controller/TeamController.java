@@ -58,14 +58,20 @@ public class TeamController {
         return teamService.getTeamHonor(id);
     }
 
+    @RequestMapping(value = "/team/getImgURL/{id}", method = RequestMethod.GET)
+    @ResponseBody
+    public String getTeamImgURL(@PathVariable int id) {
+        return teamService.getTeamImgURL(id);
+    }
+
     @RequestMapping(value = "/team/getAll/{id}", method = RequestMethod.GET)
     @ResponseBody
     public TeamReturn getTeamAllInfo(@PathVariable int id) {
         TeamBaseInfo teamBaseInfo = getTeamBaseInfo(id);
         List<TeamRelatedPerson> teamRelatedPersonList = getTeamPerson(id);
         List<TeamHonorRecord> teamHonorRecordList = getTeamHonor(id);
-
-        return new TeamReturn(200, teamBaseInfo, teamRelatedPersonList, teamHonorRecordList);
+        String imgURL = getTeamImgURL(id);
+        return new TeamReturn(200, imgURL, teamBaseInfo, teamRelatedPersonList, teamHonorRecordList);
     }
 
 

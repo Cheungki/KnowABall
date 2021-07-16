@@ -5,6 +5,7 @@ import comsoftware.engine.mapper.PlayerMapper;
 import comsoftware.engine.mapper.TeamMapper;
 import comsoftware.engine.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.convert.ThreeTenBackPortConverters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,7 +59,16 @@ public class PlayerService {
     }
 
     public String getPlayerImgURL(int id) {
-        return playerMapper.getPlayerImgURL(id);
+        try {
+            String ret = playerMapper.getPlayerImgURL(id);
+            if(ret==null || ret.equals("")){
+                ret = "https://img1.dongqiudi.com/fastdfs3/M00/B5/98/ChOxM1xC37CADGDCAAANHjH55fo314.png";
+            }
+            return ret;
+        } catch(Exception e){
+            String ret = "https://img1.dongqiudi.com/fastdfs3/M00/B5/98/ChOxM1xC37CADGDCAAANHjH55fo314.png";
+            return ret;
+        }
     }
 
     public List<Triple> getPlayerKnowledgeGraph(int id) {

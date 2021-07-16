@@ -19,4 +19,10 @@
         where `teamId` = #{id};
     </select>
 
+    <select id="getTeamImgURL" resultType="String">
+        select imgURL
+        from `teamImgURL`
+        where `teamId` = #{id};
+    </select>
+
 </mapper>

@@ -11,6 +11,8 @@ import java.util.List;
 public interface TeamMapper {
     TeamBaseInfo getTeamBaseInfo(int id);
 
+    String getTeamImgURL(int id);
+
     List<TeamHonorRecord> getTeamHonorRecord(int id);
 
     List<TeamRelatedPerson> getTeamPerson(int id);

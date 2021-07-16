@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TeamReturn {
     int code;
+    String imgURL;
     TeamBaseInfo teamBaseInfo;
     List<TeamRelatedPerson> teamRelatedPeopleList;
     List<TeamHonorRecord> teamHonorRecordList;

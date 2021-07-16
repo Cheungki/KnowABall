@@ -33,6 +33,18 @@ public class TeamService {
         return teamRepository.findById(id);
     }
 
+    public String getTeamImgURL(int id){
+        try {
+            String ret = teamMapper.getTeamImgURL(id);
+            if(ret==null || ret.equals("")){
+                ret = "https://img1.dongqiudi.com/fastdfs3/M00/B5/98/ChOxM1xC37CADGDCAAANHjH55fo314.png";
+            }
+            return ret;
+        } catch(Exception e){
+            String ret = "https://img1.dongqiudi.com/fastdfs3/M00/B5/98/ChOxM1xC37CADGDCAAANHjH55fo314.png";
+            return ret;
+        }
+    }
 
     public TeamBaseInfo getTeamBaseInfo(int id) {
         return teamMapper.getTeamBaseInfo(id);

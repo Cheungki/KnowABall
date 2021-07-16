@@ -14,6 +14,7 @@ public class TeamBaseInfo {
     @Id
     private int id;
 
+    private String imgURL;
     private String url;
 
     private int birthYear;
