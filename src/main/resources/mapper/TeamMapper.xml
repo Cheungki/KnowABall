@@ -25,4 +25,10 @@
         where `teamId` = #{id};
     </select>
 
+    <select id="getTeamByCountry" resultType="String">
+        select `name`
+        from `TeamBaseInfo`
+        where country = #{country} and id != #{id};
+    </select>
+
 </mapper>

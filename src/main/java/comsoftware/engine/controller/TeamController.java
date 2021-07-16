@@ -74,5 +74,9 @@ public class TeamController {
         return new TeamReturn(200, imgURL, teamBaseInfo, teamRelatedPersonList, teamHonorRecordList);
     }
 
+    @RequestMapping(value = "/team/kg/{id}", method = RequestMethod.GET)
+    public List<Triple> getTeamKnowledgeGraph(@PathVariable int id) {
+        return teamService.getTeamKnowledgeGraph(id);
+    }
 
 }
