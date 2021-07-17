@@ -5,20 +5,10 @@ import comsoftware.engine.mapper.PlayerMapper;
 import comsoftware.engine.mapper.TeamMapper;
 import comsoftware.engine.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.convert.ThreeTenBackPortConverters;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin
 @Service
@@ -101,12 +91,28 @@ public class PlayerService {
                 result.add(new Triple(head, "伤病", ill));
             }
         }
+
+        List<PlayerHonorRecord> honorRecords = playerMapper.getPlayerHonorRecord(id);
+        for (PlayerHonorRecord record: honorRecords) {
+            result.add(new Triple(head, "曾获荣誉", record.getHonor()));
+        }
         return result;
 
     }
 
     public List<HotWord> getPlayerHotWords(int id) {
-        return playerMapper.getPlayerHotWords(id);
+        List<HotWord> result = playerMapper.getPlayerHotWords(id);
+        List<String> tags = getPlayerTags(id);
+        for (String tag: tags) {
+            result.add(new HotWord(tag, 30));
+        }
+        return result;
+    }
+
+    public List<String> getPlayerTags(int id) {
+        PlayerTags playerTags = playerMapper.getPlayerTag(id);
+        System.out.println(playerTags.getTag());
+        return playerTags.getPlayerTags();
     }
 
 }
