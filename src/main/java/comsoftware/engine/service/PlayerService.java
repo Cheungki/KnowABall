@@ -31,6 +31,7 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     public List<Player> findPlayerByName(String name) {
+        System.out.println(name);
         return playerRepository.findByName(name);
     }
 

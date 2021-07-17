@@ -1,6 +1,7 @@
 package comsoftware.engine.service;
 
 import comsoftware.engine.entity.News;
+import comsoftware.engine.entity.returnPojo.HotNews;
 import comsoftware.engine.mapper.NewsMapper;
 import comsoftware.engine.repository.NewsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +35,9 @@ public class NewsService {
     public News getNewsById(int id) {
         return newsMapper.getNewsById(id);
     }
+/*
+    public List<HotNews> getHotTenNews(){
 
+    }
+*/
 }
