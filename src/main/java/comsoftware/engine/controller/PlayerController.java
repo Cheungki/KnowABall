@@ -90,4 +90,10 @@ public class PlayerController {
                 playerMatchDataList, playerTransferDataList, playerNewsTitlesList);
     }
 
+
+    @RequestMapping(value = "/player/hotWord/{id}", method = RequestMethod.GET)
+    public List<HotWord> getPlayerHotWord(@PathVariable int id) {
+        return playerService.getPlayerHotWords(id);
+    }
+
 }

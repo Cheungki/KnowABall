@@ -16,4 +16,6 @@ public interface TeamMapper {
     List<TeamHonorRecord> getTeamHonorRecord(int id);
 
     List<TeamRelatedPerson> getTeamPerson(int id);
+
+    List<String> getTeamByCountry(int id, String country);
 }

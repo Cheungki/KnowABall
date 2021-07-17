@@ -36,4 +36,10 @@
         from `playerImgURL`
         where `playerId` = #{id};
     </select>
+
+    <select id="getPlayerHotWords" resultType="comsoftware.engine.entity.HotWord">
+        select `word` as text, `count` as value
+        from `PlayerWord`
+        where id = #{id};
+    </select>
 </mapper>

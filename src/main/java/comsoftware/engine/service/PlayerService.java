@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @Service
@@ -31,7 +33,6 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     public List<Player> findPlayerByName(String name) {
-        System.out.println(name);
         return playerRepository.findByName(name);
     }
 
@@ -80,12 +81,32 @@ public class PlayerService {
         List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(team);
         // 开始输入结果
         List<Triple> result = new ArrayList<>();
-        result.add(new Triple(head, "所属球队", teamName));
+        result.add(new Triple(head, "现役球队", teamName));
 
         for (TeamRelatedPerson person: persons) {
-            result.add(new Triple(teamName, person.getRole(), person.getName()));
+            result.add(new Triple(head, "队友", person.getName()));
+        }
+
+        List<PlayerTransferData> transfer = playerMapper.getPlayerTransferData(id);
+        for (PlayerTransferData playerTransferData: transfer) {
+            result.add(new Triple(head, "老东家", playerTransferData.getInClub()));
+        }
+
+        List<PlayerInjuredData> injured = playerMapper.getPlayerInjuredData(id);
+        Map<String, Boolean> injury = new HashMap<>();
+        for (PlayerInjuredData playerInjuredData: injured) {
+            String ill = playerInjuredData.getInjury();
+            if (injury.get(ill) == null) {
+                injury.put(ill, true);
+                result.add(new Triple(head, "伤病", ill));
+            }
         }
         return result;
+
+    }
+
+    public List<HotWord> getPlayerHotWords(int id) {
+        return playerMapper.getPlayerHotWords(id);
     }
 
 }

@@ -19,4 +19,6 @@ public interface PlayerMapper {
     List<PlayerNewsTitles> getPlayerHotNews(int id);
 
     String getPlayerImgURL(int id);
+
+    List<HotWord> getPlayerHotWords(int id);
 }

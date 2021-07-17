@@ -21,16 +21,7 @@ public class TeamController {
 
     static int MAX_RECORD = 10;
 
-    public List<TeamBaseInfo> SimpleTeamSearch(@PathVariable String name) {
-        return teamService.findTeamByName(name);
-    }
-
-    @RequestMapping(value = "/search/team/{keyword}", method = RequestMethod.GET)
-    @ResponseBody
-    public List<TeamBaseInfo> ComplexTeamSearch(@PathVariable String name) {
-        return teamService.findTeamByName(name);
-    }
-
+    //针对Elastic Search
     @RequestMapping(value = "/search/team/name/{name}", method = RequestMethod.GET)
     @ResponseBody
     public List<TeamBaseInfo> findTeamByName(@PathVariable String name) {
@@ -44,7 +35,6 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/search/team/id/{id}", method = RequestMethod.GET)
-    @ResponseBody
     public List<TeamBaseInfo> findTeamById(@PathVariable int id) {
         return teamService.findTeamById(id);
     }
@@ -84,5 +74,9 @@ public class TeamController {
         return new TeamReturn(200, imgURL, teamBaseInfo, teamRelatedPersonList, teamHonorRecordList);
     }
 
+    @RequestMapping(value = "/team/kg/{id}", method = RequestMethod.GET)
+    public List<Triple> getTeamKnowledgeGraph(@PathVariable int id) {
+        return teamService.getTeamKnowledgeGraph(id);
+    }
 
 }
