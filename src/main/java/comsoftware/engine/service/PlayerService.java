@@ -63,6 +63,7 @@ public class PlayerService {
         }
     }
 
+    /**
     public List<Triple> getPlayerKnowledgeGraph(int id) {
         PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);
         String head = playerBaseInfo.getName();
@@ -98,6 +99,68 @@ public class PlayerService {
         }
         return result;
 
+    }
+     */
+
+    public Map<String, Object> getPlayerKnowledgeGraph(int id) {
+        PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);
+        String head = playerBaseInfo.getName();
+        int team = playerBaseInfo.getTeamId();
+        String teamName = teamMapper.getTeamBaseInfo(team).getName();
+        // 首先获取基本信息
+        List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(team);
+        List<PlayerTransferData> transfer = playerMapper.getPlayerTransferData(id);
+        List<PlayerInjuredData> injured = playerMapper.getPlayerInjuredData(id);
+        List<PlayerHonorRecord> honorRecords = playerMapper.getPlayerHonorRecord(id);
+
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Integer> idMap = new HashMap<>();
+        List<Node> nodes = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
+        idMap.put(head, 1);
+        idMap.put("队友", 2);
+        idMap.put("转会历史", 3);
+        idMap.put("伤病数据", 4);
+        idMap.put("荣誉", 5);
+        idMap.put("所属球队", 6);
+        nodes.add(new Node(1, head, "self"));
+        nodes.add(new Node(2, "队友", "relation"));
+        nodes.add(new Node(3, "转会历史", "relation"));
+        nodes.add(new Node(4, "伤病数据", "relation"));
+        nodes.add(new Node(5, "荣誉", "relation"));
+        nodes.add(new Node(6, "所属球队", "relation"));
+        edges.add(new Edge(1,2));
+        edges.add(new Edge(1,3));
+        edges.add(new Edge(1,4));
+        edges.add(new Edge(1,5));
+        edges.add(new Edge(1,6));
+        int count = 7;
+
+        for (TeamRelatedPerson person: persons) {
+            nodes.add(new Node(count, person.getName(), "teammate"));
+            edges.add(new Edge(2, count));
+            count += 1;
+        }
+        for (PlayerTransferData transferData: transfer) {
+            nodes.add(new Node(count, transferData.getOutClub(), "oldTeam"));
+            edges.add(new Edge(3, count));
+            count += 1;
+        }
+        for (PlayerInjuredData injuredData: injured) {
+            nodes.add(new Node(count, injuredData.getPeriod().substring(0, 8) + injuredData.getInjury(), "injure"));
+            edges.add(new Edge(4, count));
+            count += 1;
+        }
+        for (PlayerHonorRecord honorRecord: honorRecords) {
+            nodes.add(new Node(count, honorRecord.getHonor(), "honor"));
+            edges.add(new Edge(5, count));
+            count += 1;
+        }
+        nodes.add(new Node(count, teamName, "team"));
+        edges.add(new Edge(6, count));
+        result.put("nodes", nodes);
+        result.put("edges", edges);
+        return result;
     }
 
     public List<HotWord> getPlayerHotWords(int id) {

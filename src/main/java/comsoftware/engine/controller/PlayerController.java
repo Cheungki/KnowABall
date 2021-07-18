@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -38,9 +39,10 @@ public class PlayerController {
     // 针对数据库
     @RequestMapping(value = "/player/kg/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public List<Triple> getPlayerKnowledgeGraph(@PathVariable int id) {
+    public Map<String, Object> getPlayerKnowledgeGraph(@PathVariable int id) {
         return playerService.getPlayerKnowledgeGraph(id);
     }
+
 
     @RequestMapping(value = "/player/getInfo/{id}", method = RequestMethod.GET)
     @ResponseBody

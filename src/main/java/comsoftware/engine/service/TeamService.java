@@ -1,19 +1,15 @@
 package comsoftware.engine.service;
 
-import comsoftware.engine.entity.TeamBaseInfo;
-import comsoftware.engine.entity.TeamHonorRecord;
-import comsoftware.engine.entity.TeamRelatedPerson;
-import comsoftware.engine.entity.Triple;
+import comsoftware.engine.entity.*;
 import comsoftware.engine.mapper.TeamMapper;
 import comsoftware.engine.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TeamService {
@@ -60,23 +56,43 @@ public class TeamService {
         return teamMapper.getTeamPerson(id);
     }
 
-    public List<Triple> getTeamKnowledgeGraph(int id) {
+    public Map<String, Object> getTeamKnowledgeGraph(int id) {
         TeamBaseInfo team = getTeamBaseInfo(id);
         String name = team.getName();
-        List<Triple> result = new LinkedList<>();
+
         List<TeamRelatedPerson> teamRelatedPeople = teamMapper.getTeamPerson(id);
         List<TeamHonorRecord> teamHonorRecords = teamMapper.getTeamHonorRecord(id);
         List<String> teamsFromSameCountry = teamMapper.getTeamByCountry(id, team.getCountry());
+        List<Node> nodes = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
+        Map<String, Object> result = new HashMap<>();
+        nodes.add(new Node(1, name, "self"));
+        nodes.add(new Node(2, "球队成员", "relation"));
+        nodes.add(new Node(3, "球队荣誉", "relation"));
+        nodes.add(new Node(4, "竞争对手", "relation"));
+        edges.add(new Edge(1, 2));
+        edges.add(new Edge(1, 3));
+        edges.add(new Edge(1, 4));
+        int count = 5;
         for (TeamRelatedPerson teamRelatedPerson: teamRelatedPeople) {
-            result.add(new Triple(name, teamRelatedPerson.getRole(), teamRelatedPerson.getName()));
+            nodes.add(new Node(count, teamRelatedPerson.getName(), teamRelatedPerson.getRole()));
+            edges.add(new Edge(2, count));
+            count += 1;
         }
 
         for (TeamHonorRecord teamHonorRecord: teamHonorRecords) {
-            result.add(new Triple(name, "所获荣誉", teamHonorRecord.getHonor()));
+            nodes.add(new Node(count, teamHonorRecord.getHonor(), "honor"));
+            edges.add(new Edge(3, count));
+            count += 1;
         }
+
         for (String teamFromSameCountry: teamsFromSameCountry) {
-            result.add(new Triple(name, "竞争对手", teamFromSameCountry));
+            nodes.add(new Node(count, teamFromSameCountry, "rival"));
+            edges.add(new Edge(4, count));
+            count += 1;
         }
+        result.put("nodes", nodes);
+        result.put("edges", edges);
         return result;
     }
 

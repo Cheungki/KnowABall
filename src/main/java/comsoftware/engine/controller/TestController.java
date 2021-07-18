@@ -138,10 +138,12 @@ public class TestController {
         return playerService.getPlayerHotNews(id);
     }
 
+    /**
     @RequestMapping(value = "/test/player/kg/{id}", method = RequestMethod.GET)
     public List<Triple> getPlayerKnowledgeGraph(@PathVariable int id) {
         return playerService.getPlayerKnowledgeGraph(id);
     }
+     */
 
     @RequestMapping(value = "/test/news/{id}", method = RequestMethod.GET)
     public News getNewsById(@PathVariable int id) {

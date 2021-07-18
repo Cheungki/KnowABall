@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -75,7 +76,7 @@ public class TeamController {
     }
 
     @RequestMapping(value = "/team/kg/{id}", method = RequestMethod.GET)
-    public List<Triple> getTeamKnowledgeGraph(@PathVariable int id) {
+    public Map<String, Object> getTeamKnowledgeGraph(@PathVariable int id) {
         return teamService.getTeamKnowledgeGraph(id);
     }
 
