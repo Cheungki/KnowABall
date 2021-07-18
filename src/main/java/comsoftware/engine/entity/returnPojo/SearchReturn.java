@@ -1,5 +1,7 @@
 package comsoftware.engine.entity.returnPojo;
+import comsoftware.engine.entity.SearchInfo;
 import comsoftware.engine.entity.TotalData;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SearchReturn {
     int code;
-    int totalNum;
-    int pages;
+    SearchInfo searchInfo;
     List<TotalData> totalDataList;
 }

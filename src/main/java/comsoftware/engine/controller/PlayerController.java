@@ -30,21 +30,17 @@ public class PlayerController {
         try {
             int totalNum = 0;
             List<TotalData> dataList = new ArrayList<TotalData>();
-            List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true);
-            totalNum = retList.size();
-            int pages = totalNum / MAX_RECORD;
-            int start = (pageNum-1)*MAX_RECORD;
-            if(start < totalNum){
-                for(int i=0; i<MAX_RECORD && start+i<totalNum; i++){
-                    TotalData cur = new TotalData(1, null, retList.get(i+start), null);
-                    dataList.add(cur);
-                }
+            SearchInfo si = new SearchInfo(0L, 0L);
+            List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true, pageNum, MAX_RECORD, si);
+            for(Map<String, Object> map : retList){
+                TotalData cur = new TotalData(1, null, map, null);
+                dataList.add(cur);
             }
-            return new SearchReturn(200, totalNum, pages, dataList);
+            return new SearchReturn(200, si, dataList);
 
         } catch(Exception e){
             e.printStackTrace();
-            return new SearchReturn(400, 0, 0, new ArrayList<TotalData>());
+            return new SearchReturn(400, new SearchInfo(0L, 0L), new ArrayList<TotalData>());
         }
     }
     //针对Elastic Search

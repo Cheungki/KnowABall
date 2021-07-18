@@ -50,13 +50,13 @@ public class PlayerService {
     @Autowired
     private RestHighLevelClient client;
 
-    public List<Map<String,Object>> complexPlayerSearch(String keyword, boolean isUnique) throws IOException {
+    public List<Map<String,Object>> complexPlayerSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("player");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.from(1);
-        searchSourceBuilder.size(2000);
+        searchSourceBuilder.from((page-1)*size);
+        searchSourceBuilder.size(size);
         searchSourceBuilder.trackTotalHits(true);
         for(int i=0; i<wordsList.size(); i++){
             System.out.println(wordsList.get(i).getKeyword()+" : "+wordsList.get(i).getType());
@@ -91,16 +91,16 @@ public class PlayerService {
             }
             else{
                 BoolQueryBuilder qb = QueryBuilders.boolQuery()
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("70%"),
                                 ScoreFunctionBuilders.weightFactorFunction(500)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("70%"),
                                 ScoreFunctionBuilders.weightFactorFunction(300)));
                 if(isUnique){
-                    qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("100%"),
+                    qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("70%"),
                             ScoreFunctionBuilders.weightFactorFunction(400)));
                 }
                 boolQueryBuilder.should(qb);
@@ -128,7 +128,9 @@ public class PlayerService {
         searchSourceBuilder.query(boolQueryBuilder);
         searchRequest.source(searchSourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        System.out.println(search.getHits().getTotalHits());
+        long totals = search.getHits().getTotalHits().value;
+        long pages = totals / (long)size + (long)1;
+        si.setTotalNum(totals);  si.setPages(pages);
         //SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
         //返回结果
         ArrayList<Map<String, Object>> list = new ArrayList<>();
@@ -190,6 +192,7 @@ public class PlayerService {
         return list;
 
     }
+
 
     public List<Player> findPlayerByName(String name) {
         return playerRepository.findByName(name);
@@ -294,7 +297,7 @@ public class PlayerService {
         idMap.put("所属球队", 6);
         nodes.add(new Node(1, head, "self"));
         nodes.add(new Node(2, "队友", "relation"));
-        nodes.add(new Node(3, "转会历史", "relation"));
+        nodes.add(new Node(3, "曾效力于", "relation"));
         nodes.add(new Node(4, "伤病数据", "relation"));
         nodes.add(new Node(5, "荣誉", "relation"));
         nodes.add(new Node(6, "所属球队", "relation"));
@@ -304,6 +307,7 @@ public class PlayerService {
         edges.add(new Edge(1,5));
         edges.add(new Edge(1,6));
         int count = 7;
+        Map<String, Boolean> teamMap = new HashMap<>();
 
         for (TeamRelatedPerson person: persons) {
             nodes.add(new Node(count, person.getName(), "teammate"));
@@ -311,9 +315,13 @@ public class PlayerService {
             count += 1;
         }
         for (PlayerTransferData transferData: transfer) {
+            if (teamMap.containsKey(transferData.getOutClub())) {
+                continue;
+            }
             nodes.add(new Node(count, transferData.getOutClub(), "oldTeam"));
             edges.add(new Edge(3, count));
             count += 1;
+            teamMap.put(transferData.getOutClub(), true);
         }
         for (PlayerInjuredData injuredData: injured) {
             nodes.add(new Node(count, injuredData.getPeriod().substring(0, 8) + injuredData.getInjury(), "injure"));

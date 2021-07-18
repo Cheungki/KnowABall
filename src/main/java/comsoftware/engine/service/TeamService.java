@@ -40,18 +40,19 @@ public class TeamService {
     @Autowired
     private RestHighLevelClient client;
 
-    public List<Map<String,Object>> complexTeamSearch(String keyword, boolean isUnique) throws IOException {
+    public List<Map<String,Object>> complexTeamSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         //NativeSearchQueryBuilder searchQuery = new NativeSearchQueryBuilder();
         SearchRequest searchRequest = new SearchRequest("team");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.from(1);
-        searchSourceBuilder.size(5000);
+        searchSourceBuilder.from((page-1)*size);
+        searchSourceBuilder.size(size);
         for(int i=0; i<wordsList.size(); i++){
             System.out.println(wordsList.get(i).getKeyword()+" : "+wordsList.get(i).getType());
             String kw = wordsList.get(i).getKeyword();
             if(wordsList.get(i).getType() == 1){
+
                 BoolQueryBuilder qb = QueryBuilders.boolQuery()
                         .should(QueryBuilders.matchPhraseQuery("name", kw))
                         .should(QueryBuilders.matchPhraseQuery("englishName", kw))
@@ -62,6 +63,8 @@ public class TeamService {
                     qb.should(QueryBuilders.matchPhraseQuery("audience", kw));
                 }
                 boolQueryBuilder.must(qb);
+
+                //boolQueryBuilder.should(QueryBuilders.matchPhraseQuery("name", kw));
             }
             else if(wordsList.get(i).getType() == 2){
                 BoolQueryBuilder qb = QueryBuilders.boolQuery()
@@ -84,7 +87,7 @@ public class TeamService {
             }
             else{
                 BoolQueryBuilder qb = QueryBuilders.boolQuery()
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
@@ -98,7 +101,8 @@ public class TeamService {
                     qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("100%"),
                             ScoreFunctionBuilders.weightFactorFunction(250)));
                 }
-                boolQueryBuilder.should(qb);
+
+                boolQueryBuilder.must(qb);
             }
         }
 
@@ -125,8 +129,9 @@ public class TeamService {
         searchSourceBuilder.query(boolQueryBuilder);
         searchRequest.source(searchSourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        int total = search.getTotalShards();
-        System.out.println("sousuojieguo : "+total);
+        long totals = search.getHits().getTotalHits().value;
+        long pages = totals / (long)size + (long)1;
+        si.setTotalNum(totals);  si.setPages(pages);
         //SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
         //返回结果
         ArrayList<Map<String, Object>> list = new ArrayList<>();

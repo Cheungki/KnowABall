@@ -2,6 +2,7 @@ package comsoftware.engine.service;
 
 import comsoftware.engine.entity.News;
 import comsoftware.engine.entity.Pair;
+import comsoftware.engine.entity.SearchInfo;
 import comsoftware.engine.mapper.NewsMapper;
 import comsoftware.engine.repository.NewsRepository;
 import comsoftware.engine.utils.Utils;
@@ -40,13 +41,13 @@ public class NewsService {
     @Autowired
     private RestHighLevelClient client;
 
-    public List<Map<String,Object>> complexNewsSearch(String keyword, boolean isUnique) throws IOException {
+    public List<Map<String,Object>> complexNewsSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si, int bias) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("news");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.from(1);
-        searchSourceBuilder.size(5000);
+        searchSourceBuilder.from((page-1)*size+bias);
+        searchSourceBuilder.size(size);
         searchSourceBuilder.trackTotalHits(true);
         for(int i=0; i<wordsList.size(); i++){
             System.out.println(wordsList.get(i).getKeyword()+" : "+wordsList.get(i).getType());
@@ -103,7 +104,14 @@ public class NewsService {
         searchSourceBuilder.query(boolQueryBuilder);
         searchRequest.source(searchSourceBuilder);
         SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        System.out.println(search.getHits().getTotalHits());
+
+        long totals = search.getHits().getTotalHits().value;
+        System.out.println("totals:"+totals);
+        long pages = 0L;
+        if(size != 0L){
+            pages = totals / (long)size + (long)1;
+        }
+        si.setTotalNum(totals);  si.setPages(pages);
         //SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
         //返回结果
         ArrayList<Map<String, Object>> list = new ArrayList<>();
@@ -152,6 +160,7 @@ public class NewsService {
         }
         return list;
     }
+
     public List<News> findNewsByTag(String tag) {
         return newsRepository.findByTags(tag);
     }

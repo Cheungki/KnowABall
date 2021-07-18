@@ -24,25 +24,21 @@ public class NewsController {
     static int MAX_RECORD = 10;
 
     @RequestMapping(value = "/search/news/{keyword}/{pageNum}", method = RequestMethod.GET)
-    public SearchReturn ComplexPlayerSearch(@PathVariable String keyword, @PathVariable int pageNum) {
+    public SearchReturn ComplexNewsSearch(@PathVariable String keyword, @PathVariable int pageNum) {
         try {
             int totalNum = 0;
             List<TotalData> dataList = new ArrayList<TotalData>();
-            List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true);
-            totalNum = retList.size();
-            int pages = totalNum / MAX_RECORD;
-            int start = (pageNum-1)*MAX_RECORD;
-            if(start < totalNum){
-                for(int i=0; i<MAX_RECORD && start+i<totalNum; i++){
-                    TotalData cur = new TotalData(3, retList.get(i+start), null, null);
-                    dataList.add(cur);
-                }
+            SearchInfo si = new SearchInfo(0L, 0L);
+            List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true, pageNum, MAX_RECORD, si, 0);
+            for(Map<String, Object> map : retList){
+                TotalData cur = new TotalData(3, map, null, null);
+                dataList.add(cur);
             }
-            return new SearchReturn(200, totalNum, pages, dataList);
+            return new SearchReturn(200, si, dataList);
 
         } catch(Exception e){
             e.printStackTrace();
-            return new SearchReturn(400, 0, 0, new ArrayList<TotalData>());
+            return new SearchReturn(400, new SearchInfo(0L, 0L), new ArrayList<TotalData>());
         }
     }
     //针对Elastic Search
