@@ -1,6 +1,7 @@
 package comsoftware.engine.controller;
 
 import comsoftware.engine.entity.*;
+import comsoftware.engine.entity.returnPojo.SearchReturn;
 import comsoftware.engine.service.PlayerService;
 import comsoftware.engine.service.TeamService;
 import comsoftware.engine.service.NewsService;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -24,30 +26,49 @@ public class TotalController {
     @Autowired
     private NewsService newsService;
 
-    @RequestMapping(value = "/search/all/{name}", method = RequestMethod.GET)
+    static int MAX_RECORD = 10;
+
+    @RequestMapping(value = "/search/all/{keyword}/{pageNum}", method = RequestMethod.GET)
     @ResponseBody
-    private List<TotalData> searchForAll(@PathVariable String name){
-        List<TotalData> dataList = new ArrayList<TotalData>();
-        List<Player> playerList = playerService.findPlayerByName(name);
-        if (playerList.size()>0){
-            int maxNum = (playerList.size() > 5) ? 5 : playerList.size();
-            for (int i=0; i<maxNum; i++){
-                dataList.add(new TotalData(1, null, playerList.get(i), null));
+    public SearchReturn searchForAll(@PathVariable String keyword, @PathVariable int pageNum) {
+        try {
+            List<TotalData> allDataList = new ArrayList<TotalData>();
+            List<Map<String, Object>> playerList = playerService.complexPlayerSearch(keyword, false);
+            if (playerList.size() > 0) {
+                int maxNum = (playerList.size() > 5) ? 5 : playerList.size();
+                for (int i = 0; i < maxNum; i++) {
+                    allDataList.add(new TotalData(1, null, playerList.get(i), null));
+                }
             }
-        }
-        System.out.println(playerList.size());
-        List<TeamBaseInfo> teamList = teamService.findTeamByName(name);
-        if (teamList.size()>0){
-            int maxNum = (teamList.size() > 5) ? 5 : teamList.size();
-            for (int i=0; i<maxNum; i++){
-                dataList.add(new TotalData(2, null, null, teamList.get(i)));
+            System.out.println(playerList.size());
+            List<Map<String, Object>> teamList = teamService.complexTeamSearch(keyword, false);
+            if (teamList.size() > 0) {
+                int maxNum = (teamList.size() > 5) ? 5 : teamList.size();
+                for (int i = 0; i < maxNum; i++) {
+                    allDataList.add(new TotalData(2, null, null, teamList.get(i)));
+                }
             }
+            System.out.println(teamList.size());
+            List<Map<String, Object>> newsList = newsService.complexNewsSearch(keyword, false);
+            System.out.println(newsList.size());
+            for (int i = 0; i < newsList.size(); i++) {
+                allDataList.add(new TotalData(3, newsList.get(i), null, null));
+            }
+            System.out.println("total: "+allDataList.size());
+            List<TotalData> dataList = new ArrayList<TotalData>();
+            int totalNum = allDataList.size();
+            int pages = totalNum / MAX_RECORD;
+            if(pageNum <= pages){
+                int start = (pageNum-1)*MAX_RECORD;
+                for(int i=0; i<MAX_RECORD && start+i<totalNum; i++) {
+                    dataList.add(allDataList.get(start+i));
+                }
+            }
+            return new SearchReturn(200, totalNum, pages, dataList);
+        } catch(Exception e){
+            e.printStackTrace();
+            return new SearchReturn(400, 0, 0, new ArrayList<TotalData>());
+
         }
-        System.out.println(teamList.size());
-        List<News> newsList = newsService.findNewsByContent(name);
-        for (int i=0; i < newsList.size(); i++){
-            dataList.add(new TotalData(3, newsList.get(i), null, null));
-        }
-        return dataList;
     }
 }

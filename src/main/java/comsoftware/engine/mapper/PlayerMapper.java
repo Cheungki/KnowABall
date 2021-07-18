@@ -21,4 +21,8 @@ public interface PlayerMapper {
     String getPlayerImgURL(int id);
 
     List<HotWord> getPlayerHotWords(int id);
+
+    PlayerTags getPlayerTag(int id);
+
+    List<PlayerHonorRecord> getPlayerHonorRecord(int id);
 }

@@ -42,4 +42,17 @@
         from `PlayerWord`
         where id = #{id};
     </select>
+
+    <select id="getPlayerTag" resultType="comsoftware.engine.entity.PlayerTags">
+        select `player_tags` as tag, `player_traits` as trait
+        from playerFIFAData
+        where playerId = #{id};
+    </select>
+
+    <select id="getPlayerHonorRecord" resultType="comsoftware.engine.entity.PlayerHonorRecord">
+        select *
+        from `PlayerHonorRecord`
+        where playerId = #{id};
+    </select>
+
 </mapper>

@@ -51,6 +51,9 @@ _index_mappings = {
             "id": {
                 "type": "keyword"
             },
+            "article_id": {
+                "type": "keyword"
+            },
             "url": {
                 "type": "keyword"
             },
@@ -62,6 +65,9 @@ _index_mappings = {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
             },
+            "time": {
+                "type": "date"
+            },
             "content": {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
@@ -69,6 +75,9 @@ _index_mappings = {
             "tags": {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
+            },
+            "img_url": {
+                "type": "keyword"
             }
         }
         
@@ -84,7 +93,7 @@ else:
     es.indices.create(index = "news", body=_index_mappings)
 
 
-sql = "select * from news;"
+sql = "select * from news2;"
 cursor = db.cursor()
 cursor.execute(sql)
 data = cursor.fetchall()
@@ -95,11 +104,14 @@ actions = []
 for i in data:
     line = {
         "id": i[0],
-        "url": i[1],
-        "title": i[2],
-        "author": i[3],
-        "content": i[4],
-        "tags": i[5],
+        "article_id": i[1],
+        "url": i[2],
+        "title": i[3],
+        "author": i[4],
+        "time": i[5],
+        "content": i[6],
+        "tags": i[7],
+        "img_url": i[8]
     }
     action = {"_index": "news", '_id': count, "_source": line}
     count += 1

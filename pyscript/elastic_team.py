@@ -22,7 +22,7 @@ _index_mappings = {
                 "analyzer":{
                     "ik_pinyin_analyzer":{
                         "type":"custom",
-                        "tokenizer":"ik_smart",
+                        "tokenizer":"ik_max_word",
                         "filter":"pinyin_filter"
                     },
                     "pinyin_analyzer" : {
@@ -61,10 +61,12 @@ _index_mappings = {
                 "type": "integer"
             },
             "country": {
-                "type": "keyword"
+                "type": "text",
+                "analyzer": "ik_pinyin_analyzer"
             },
             "city": {
-                "type": "keyword"
+                "type": "text",
+                "analyzer": "ik_pinyin_analyzer"
             },
             "stadium": {
                 "type": "text",

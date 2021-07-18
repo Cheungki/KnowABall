@@ -1,19 +1,33 @@
 package comsoftware.engine.service;
 
-import comsoftware.engine.entity.TeamBaseInfo;
-import comsoftware.engine.entity.TeamHonorRecord;
-import comsoftware.engine.entity.TeamRelatedPerson;
-import comsoftware.engine.entity.Triple;
+import comsoftware.engine.entity.*;
 import comsoftware.engine.mapper.TeamMapper;
 import comsoftware.engine.repository.TeamRepository;
+import comsoftware.engine.utils.Utils;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 public class TeamService {
@@ -22,6 +36,166 @@ public class TeamService {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private RestHighLevelClient client;
+
+    public List<Map<String,Object>> complexTeamSearch(String keyword, boolean isUnique) throws IOException {
+        ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
+        //NativeSearchQueryBuilder searchQuery = new NativeSearchQueryBuilder();
+        SearchRequest searchRequest = new SearchRequest("team");
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.from(1);
+        searchSourceBuilder.size(5000);
+        for(int i=0; i<wordsList.size(); i++){
+            System.out.println(wordsList.get(i).getKeyword()+" : "+wordsList.get(i).getType());
+            String kw = wordsList.get(i).getKeyword();
+            if(wordsList.get(i).getType() == 1){
+                BoolQueryBuilder qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.matchPhraseQuery("name", kw))
+                        .should(QueryBuilders.matchPhraseQuery("englishName", kw))
+                        .should(QueryBuilders.matchPhraseQuery("stadium", kw))
+                        .should(QueryBuilders.matchPhraseQuery("country", kw))
+                        .should(QueryBuilders.matchPhraseQuery("city", kw));
+                if(isUnique){
+                    qb.should(QueryBuilders.matchPhraseQuery("audience", kw));
+                }
+                boolQueryBuilder.must(qb);
+            }
+            else if(wordsList.get(i).getType() == 2){
+                BoolQueryBuilder qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.matchPhraseQuery("name", kw))
+                        .should(QueryBuilders.matchPhraseQuery("englishName", kw))
+                        .should(QueryBuilders.matchPhraseQuery("stadium", kw))
+                        .should(QueryBuilders.matchPhraseQuery("audience", kw))
+                        .should(QueryBuilders.matchPhraseQuery("country", kw))
+                        .should(QueryBuilders.matchPhraseQuery("city", kw));
+                if(isUnique){
+                    qb.should(QueryBuilders.matchPhraseQuery("audience", kw));
+                }
+                boolQueryBuilder.mustNot(qb);
+            }
+            else if(wordsList.get(i).getType() == 3){
+                QueryBuilder qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.matchPhraseQuery("name", kw))
+                        .should(QueryBuilders.matchPhraseQuery("englishName", kw));
+                boolQueryBuilder.must(qb);
+            }
+            else{
+                BoolQueryBuilder qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("100%"),
+                                ScoreFunctionBuilders.weightFactorFunction(1000)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
+                                ScoreFunctionBuilders.weightFactorFunction(1000)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
+                                ScoreFunctionBuilders.weightFactorFunction(500)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                                ScoreFunctionBuilders.weightFactorFunction(300)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("city", kw).minimumShouldMatch("100%"),
+                                ScoreFunctionBuilders.weightFactorFunction(300)));
+                if(isUnique){
+                    qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("100%"),
+                            ScoreFunctionBuilders.weightFactorFunction(250)));
+                }
+                boolQueryBuilder.should(qb);
+            }
+        }
+
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        highlightBuilder.preTags("<span style=\"color:red\">"); // 高亮前缀
+        highlightBuilder.postTags("</span>"); // 高亮后缀
+        List<HighlightBuilder.Field> fields = highlightBuilder.fields();
+        fields.add(new HighlightBuilder
+                .Field("name")); // 高亮字段
+        fields.add(new HighlightBuilder
+                .Field("englishName")); // 高亮字段
+        fields.add(new HighlightBuilder
+                .Field("stadium")); // 高亮字段
+        fields.add(new HighlightBuilder
+                .Field("country")); // 高亮字段
+        fields.add(new HighlightBuilder
+                .Field("city")); // 高亮字段
+        if(isUnique){
+            fields.add(new HighlightBuilder
+                    .Field("audience"));
+        }
+        // 添加高亮查询条件到搜索源
+        searchSourceBuilder.highlighter(highlightBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        int total = search.getTotalShards();
+        System.out.println("sousuojieguo : "+total);
+        //SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
+        //返回结果
+        ArrayList<Map<String, Object>> list = new ArrayList<>();
+        for (SearchHit hit : search.getHits().getHits()) {
+            Map<String, HighlightField> highlightFields = hit.getHighlightFields();
+            HighlightField name = highlightFields.get("name");
+            HighlightField englishName = highlightFields.get("englishName");
+            HighlightField stadium = highlightFields.get("stadium");
+            HighlightField country = highlightFields.get("country");
+            HighlightField city = highlightFields.get("city");
+            HighlightField audience = null;
+            if(isUnique){
+                audience = highlightFields.get("audience");
+            }
+            Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+
+            if (name != null) {
+                Text[] fragments = name.fragments();
+                String newName = "";
+                for (Text fragment : fragments) {
+                    newName += fragment;
+                }
+                sourceAsMap.put("name", newName);
+            }
+            if (englishName != null) {
+                Text[] fragments = englishName.fragments();
+                String newEnglishName = "";
+                for (Text fragment : fragments) {
+                    newEnglishName += fragment;
+                }
+                sourceAsMap.put("englishName", newEnglishName);
+            }
+            if (stadium != null) {
+                Text[] fragments = stadium.fragments();
+                String newStadium = "";
+                for (Text fragment : fragments) {
+                    newStadium += fragment;
+                }
+                sourceAsMap.put("stadium", newStadium);
+            }
+            if (country != null) {
+                Text[] fragments = country.fragments();
+                String newCountry = "";
+                for (Text fragment : fragments) {
+                    newCountry += fragment;
+                }
+                sourceAsMap.put("country", newCountry);
+            }
+            if (city != null) {
+                Text[] fragments = city.fragments();
+                String newCity = "";
+                for (Text fragment : fragments) {
+                    newCity += fragment;
+                }
+                sourceAsMap.put("city", newCity);
+            }
+            if(isUnique && audience!=null){
+                Text[] fragments = audience.fragments();
+                String newAudience = "";
+                for (Text fragment : fragments) {
+                    newAudience += fragment;
+                }
+                sourceAsMap.put("audience", newAudience);
+            }
+            list.add(sourceAsMap);
+
+        }
+        return list;
+    }
 
     public List<TeamBaseInfo> findTeamByName(String name) {
         return teamRepository.findByName(name);
@@ -60,23 +234,43 @@ public class TeamService {
         return teamMapper.getTeamPerson(id);
     }
 
-    public List<Triple> getTeamKnowledgeGraph(int id) {
+    public Map<String, Object> getTeamKnowledgeGraph(int id) {
         TeamBaseInfo team = getTeamBaseInfo(id);
         String name = team.getName();
-        List<Triple> result = new LinkedList<>();
+
         List<TeamRelatedPerson> teamRelatedPeople = teamMapper.getTeamPerson(id);
         List<TeamHonorRecord> teamHonorRecords = teamMapper.getTeamHonorRecord(id);
         List<String> teamsFromSameCountry = teamMapper.getTeamByCountry(id, team.getCountry());
+        List<Node> nodes = new ArrayList<>();
+        List<Edge> edges = new ArrayList<>();
+        Map<String, Object> result = new HashMap<>();
+        nodes.add(new Node(1, name, "self"));
+        nodes.add(new Node(2, "球队成员", "relation"));
+        nodes.add(new Node(3, "球队荣誉", "relation"));
+        nodes.add(new Node(4, "竞争对手", "relation"));
+        edges.add(new Edge(1, 2));
+        edges.add(new Edge(1, 3));
+        edges.add(new Edge(1, 4));
+        int count = 5;
         for (TeamRelatedPerson teamRelatedPerson: teamRelatedPeople) {
-            result.add(new Triple(name, teamRelatedPerson.getRole(), teamRelatedPerson.getName()));
+            nodes.add(new Node(count, teamRelatedPerson.getName(), teamRelatedPerson.getRole()));
+            edges.add(new Edge(2, count));
+            count += 1;
         }
 
         for (TeamHonorRecord teamHonorRecord: teamHonorRecords) {
-            result.add(new Triple(name, "所获荣誉", teamHonorRecord.getHonor()));
+            nodes.add(new Node(count, teamHonorRecord.getHonor(), "honor"));
+            edges.add(new Edge(3, count));
+            count += 1;
         }
+
         for (String teamFromSameCountry: teamsFromSameCountry) {
-            result.add(new Triple(name, "竞争对手", teamFromSameCountry));
+            nodes.add(new Node(count, teamFromSameCountry, "rival"));
+            edges.add(new Edge(4, count));
+            count += 1;
         }
+        result.put("nodes", nodes);
+        result.put("edges", edges);
         return result;
     }
 

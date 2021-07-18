@@ -2,6 +2,7 @@ package comsoftware.engine.controller;
 
 import comsoftware.engine.entity.*;
 import comsoftware.engine.entity.returnPojo.PlayerReturn;
+import comsoftware.engine.entity.returnPojo.SearchReturn;
 import comsoftware.engine.repository.PlayerRepository;
 import comsoftware.engine.service.PlayerService;
 
@@ -11,7 +12,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin
 @RestController
@@ -22,6 +25,28 @@ public class PlayerController {
 
     static int MAX_RECORD = 10;
 
+    @RequestMapping(value = "/search/player/{keyword}/{pageNum}", method = RequestMethod.GET)
+    public SearchReturn ComplexPlayerSearch(@PathVariable String keyword, @PathVariable int pageNum) {
+        try {
+            int totalNum = 0;
+            List<TotalData> dataList = new ArrayList<TotalData>();
+            List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true);
+            totalNum = retList.size();
+            int pages = totalNum / MAX_RECORD;
+            int start = (pageNum-1)*MAX_RECORD;
+            if(start < totalNum){
+                for(int i=0; i<MAX_RECORD && start+i<totalNum; i++){
+                    TotalData cur = new TotalData(1, null, retList.get(i+start), null);
+                    dataList.add(cur);
+                }
+            }
+            return new SearchReturn(200, totalNum, pages, dataList);
+
+        } catch(Exception e){
+            e.printStackTrace();
+            return new SearchReturn(400, 0, 0, new ArrayList<TotalData>());
+        }
+    }
     //针对Elastic Search
     @RequestMapping(value = "/search/player/name/{name}", method = RequestMethod.GET)
     @ResponseBody
@@ -38,9 +63,10 @@ public class PlayerController {
     // 针对数据库
     @RequestMapping(value = "/player/kg/{id}", method = RequestMethod.GET)
     @ResponseBody
-    public List<Triple> getPlayerKnowledgeGraph(@PathVariable int id) {
+    public Map<String, Object> getPlayerKnowledgeGraph(@PathVariable int id) {
         return playerService.getPlayerKnowledgeGraph(id);
     }
+
 
     @RequestMapping(value = "/player/getInfo/{id}", method = RequestMethod.GET)
     @ResponseBody
