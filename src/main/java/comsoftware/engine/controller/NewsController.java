@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +21,9 @@ import java.util.Map;
 public class NewsController {
     @Autowired
     private NewsService newsService;
+
+    @Autowired
+    private List<Recommend> defaultRe;
 
     static int MAX_RECORD = 10;
 
@@ -30,15 +34,43 @@ public class NewsController {
             List<TotalData> dataList = new ArrayList<TotalData>();
             SearchInfo si = new SearchInfo(0L, 0L);
             List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true, pageNum, MAX_RECORD, si, 0);
+            //----------添加推荐----------------------------------
+            int id; List<Recommend> recommendList = new ArrayList<Recommend>();
+            if(retList.size()>0) {
+                id = (Integer) (retList.get(0).get("id"));
+                recommendList = newsService.getNewsRecommend(id);
+            }
+            if(recommendList.size()<6){
+                Collections.shuffle(defaultRe);
+                for(Recommend re : defaultRe){
+                    if(recommendList.size()>=6) break;
+                    int flag = 0;
+                    for(Recommend cur:recommendList){
+                        if(re.getType() == cur.getType() && re.getId()==cur.getId()){
+                            flag = 1;
+                            break;
+                        }
+                    }
+                    if(flag == 0){
+                        recommendList.add(re);
+                    }
+                }
+            }
+
+            //---------------------------------------------------
             for(Map<String, Object> map : retList){
                 TotalData cur = new TotalData(3, map, null, null);
                 dataList.add(cur);
             }
-            return new SearchReturn(200, si, dataList);
+            return new SearchReturn(200, si, recommendList, dataList);
 
         } catch(Exception e){
             e.printStackTrace();
-            return new SearchReturn(400, new SearchInfo(0L, 0L), new ArrayList<TotalData>());
+            List<Recommend> recommendList = new ArrayList<Recommend>();
+            Collections.shuffle(defaultRe);
+            for(int i=0; i<6; i++)
+                recommendList.add(defaultRe.get(i));
+            return new SearchReturn(400, new SearchInfo(0L, 0L), recommendList, new ArrayList<TotalData>());
         }
     }
 

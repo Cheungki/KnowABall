@@ -1,4 +1,5 @@
 package comsoftware.engine.entity.returnPojo;
+import comsoftware.engine.entity.Recommend;
 import comsoftware.engine.entity.SearchInfo;
 import comsoftware.engine.entity.TotalData;
 
@@ -14,5 +15,6 @@ import java.util.List;
 public class SearchReturn {
     int code;
     SearchInfo searchInfo;
+    List<Recommend> recommendList;
     List<TotalData> totalDataList;
 }

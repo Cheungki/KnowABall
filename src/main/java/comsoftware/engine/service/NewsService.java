@@ -1,8 +1,6 @@
 package comsoftware.engine.service;
 
-import comsoftware.engine.entity.News;
-import comsoftware.engine.entity.Pair;
-import comsoftware.engine.entity.SearchInfo;
+import comsoftware.engine.entity.*;
 import comsoftware.engine.mapper.NewsMapper;
 import comsoftware.engine.repository.NewsRepository;
 import comsoftware.engine.utils.Utils;
@@ -44,6 +42,12 @@ public class NewsService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    private PlayerService playerService;
+
+    @Autowired
+    private TeamService teamService;
 
     public List<Map<String,Object>> complexNewsSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si, int bias) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
@@ -204,6 +208,27 @@ public class NewsService {
             }
         }
         return keywords;
+    }
+
+    public List<Recommend> getNewsRecommend(int id){
+        List<Recommend> recommendList = new ArrayList<Recommend>();
+        News news = getNewsById(id);
+        String tag = news.getTags();
+        String[] tags = tag.split(",");
+        for(String newTag : tags){
+            List<Player> players = playerService.findPlayerByName(newTag);
+            if(players.size()>0 && recommendList.size()<6){
+                Player p = players.get(0);
+                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+            }
+            List<TeamBaseInfo> teams = teamService.findTeamByName(newTag);
+            if(teams.size()>0 && recommendList.size()<6){
+                TeamBaseInfo t = teams.get(0);
+                recommendList.add(new Recommend(2, t.getId(), t.getName(), t.getImgURL()));
+            }
+        }
+
+        return recommendList;
     }
 
     public List<News> findNewsByTag(String tag) {

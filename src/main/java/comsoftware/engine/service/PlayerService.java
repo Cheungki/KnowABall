@@ -34,10 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin
 @Service
@@ -318,6 +315,25 @@ public class PlayerService {
 
     }
      */
+    public List<Recommend> getPlayerRecommend(int id){
+        List<Recommend> recommendList = new ArrayList<Recommend>();
+        PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);
+        int team = playerBaseInfo.getTeamId();
+        TeamBaseInfo teamBaseInfo = teamMapper.getTeamBaseInfo(team);
+        if(recommendList.size()<6){
+            recommendList.add(new Recommend(2, teamBaseInfo.getId(), teamBaseInfo.getName(), teamBaseInfo.getImgURL()));
+        }
+        List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(team);
+        for(TeamRelatedPerson person:persons){
+            String pName = person.getName();
+            List<Player> players = findPlayerByName(pName);
+            if(players.size()>0 && recommendList.size()<6){
+                Player p = players.get(0);
+                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+            }
+        }
+        return recommendList;
+    }
 
     public Map<String, Object> getPlayerKnowledgeGraph(int id) {
         PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);

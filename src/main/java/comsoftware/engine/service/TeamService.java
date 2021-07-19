@@ -42,6 +42,9 @@ public class TeamService {
     private TeamRepository teamRepository;
 
     @Autowired
+    private PlayerService playerService;
+
+    @Autowired
     private RestHighLevelClient client;
 
     public List<Map<String,Object>> complexTeamSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si) throws IOException {
@@ -245,6 +248,20 @@ public class TeamService {
             }
         }
         return keywords;
+    }
+
+    public List<Recommend> getTeamRecommend(int id){
+        List<Recommend> recommendList = new ArrayList<Recommend>();
+        List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(id);
+        for(TeamRelatedPerson person:persons){
+            String pName = person.getName();
+            List<Player> players = playerService.findPlayerByName(pName);
+            if(players.size()>0 && recommendList.size()<6){
+                Player p = players.get(0);
+                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+            }
+        }
+        return recommendList;
     }
 
     public List<TeamBaseInfo> findTeamByName(String name) {
