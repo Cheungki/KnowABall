@@ -421,4 +421,16 @@ public class PlayerService {
         return playerMapper.getPlayerMatchDataByType(id, type);
     }
 
+    public List<PlayerNews> getPlayerNews(int id) {
+        PlayerNews all = playerMapper.getPlayerNews(id);
+        String[] title = all.getTitles().split("&&");
+        String[] url = all.getUrls().split("&&");
+        String[] img = all.getImg_urls().split("&&");
+        List<PlayerNews> result = new ArrayList<>();
+        for (int i = 0; i < title.length; i ++) {
+            result.add(new PlayerNews(title[i], url[i], img[i]));
+        }
+        return result;
+    }
+
 }

@@ -180,4 +180,9 @@ public class PlayerController {
     public List<PlayerMatchData2> getPlayerMatchDataByType(@PathVariable int id, @PathVariable int type) {
         return playerService.getPlayerMatchDataByType(id, type);
     }
+
+    @RequestMapping(value = "/player/news/{id}", method = RequestMethod.GET)
+    public List<PlayerNews> getPlayerNews(@PathVariable int id) {
+        return playerService.getPlayerNews(id);
+    }
 }

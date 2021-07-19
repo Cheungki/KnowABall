@@ -61,4 +61,10 @@
         where `playerId` = #{id} and `type` = #{type};
     </select>
 
+    <select id="getPlayerNews" resultType="comsoftware.engine.entity.PlayerNews" >
+        select titles, urls, img_urls
+        from `PlayerNews`
+        where `playerId` = #{id};
+    </select>
+
 </mapper>
