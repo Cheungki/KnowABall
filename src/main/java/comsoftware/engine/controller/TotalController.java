@@ -82,7 +82,7 @@ public class TotalController {
                 allDataList.add(new TotalData(3, newsList.get(i), null, null));
             }
             //----------添加推荐----------------------------------
-            int id_1, id_2;
+            int id_1=-1, id_2=-1;
             List<Recommend> recommendList = new ArrayList<Recommend>();
             if(playerList.size()>0){
                 id_1 = (Integer) (playerList.get(0).get("id"));
@@ -100,7 +100,7 @@ public class TotalController {
                     if(recommendList.size()>=6) break;
                     int flag = 0;
                     for(Recommend cur:recommendList){
-                        if(re.getType() == cur.getType() && re.getId()==cur.getId()){
+                        if(re.getId()==id_1 || re.getId()==id_2 || (re.getType() == cur.getType() && re.getId()==cur.getId())){
                             flag = 1;
                             break;
                         }

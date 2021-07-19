@@ -33,7 +33,7 @@ public class PlayerController {
             SearchInfo si = new SearchInfo(0L, 0L);
             List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true, pageNum, MAX_RECORD, si);
             //----------添加推荐----------------------------------
-            int id; List<Recommend> recommendList = new ArrayList<Recommend>();
+            int id=-1; List<Recommend> recommendList = new ArrayList<Recommend>();
             if(retList.size()>0) {
                 id = (Integer) (retList.get(0).get("id"));
                 recommendList = playerService.getPlayerRecommend(id);
@@ -44,7 +44,7 @@ public class PlayerController {
                     if(recommendList.size()>=6) break;
                     int flag = 0;
                     for(Recommend cur:recommendList){
-                        if(re.getType() == cur.getType() && re.getId()==cur.getId()){
+                        if(re.getId()==id || (re.getType() == cur.getType() && re.getId()==cur.getId())){
                             flag = 1;
                             break;
                         }
@@ -141,8 +141,33 @@ public class PlayerController {
         List<PlayerInjuredData> playerInjuredDataList = getPlayerInjuredData(id);
         List<PlayerTransferData> playerTransferDataList = getPlayerTransferData(id);
         List<PlayerNewsTitles> playerNewsTitlesList = getPlayerNewsTitles(id);
+        List<Recommend> newRecommendList = new ArrayList<Recommend>();
+        List<Recommend> recommendList = playerService.getPlayerRecommend(id);
+        if(recommendList.size()>=3){
+            newRecommendList.add(recommendList.get(0));
+            newRecommendList.add(recommendList.get(1));
+            newRecommendList.add(recommendList.get(2));
+        }
+        else {
+            Collections.shuffle(defaultRe);
+            for (Recommend re : defaultRe) {
+                if (recommendList.size() >= 3) break;
+                int flag = 0;
+                for (Recommend cur : recommendList) {
+                    if (re.getId() == id || (re.getType() == cur.getType() && re.getId() == cur.getId())) {
+                        flag = 1;
+                        break;
+                    }
+                }
+                if (flag == 0) {
+                    recommendList.add(re);
+                }
+            }
+            newRecommendList = recommendList;
+        }
         return new PlayerReturn(200, imgURL, playerBaseInfo, playerInjuredDataList
-                , playerTransferDataList, playerNewsTitlesList);
+                    , playerTransferDataList, playerNewsTitlesList, newRecommendList);
+
     }
 
 

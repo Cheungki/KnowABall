@@ -15,4 +15,5 @@ public class TeamReturn {
     TeamBaseInfo teamBaseInfo;
     List<TeamRelatedPerson> teamRelatedPeopleList;
     List<TeamHonorRecord> teamHonorRecordList;
+    List<Recommend> recommendList;
 }

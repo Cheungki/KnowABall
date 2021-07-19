@@ -261,6 +261,7 @@ public class TeamService {
                 recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
             }
         }
+        Collections.shuffle(recommendList);
         return recommendList;
     }
 

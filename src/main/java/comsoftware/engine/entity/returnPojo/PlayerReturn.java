@@ -16,4 +16,5 @@ public class PlayerReturn {
     List<PlayerInjuredData> playerInjuredDataList;
     List<PlayerTransferData> playerTransferDataList;
     List<PlayerNewsTitles> playerNewsTitlesList;
+    List<Recommend> recommendList;
 }

@@ -35,7 +35,7 @@ public class NewsController {
             SearchInfo si = new SearchInfo(0L, 0L);
             List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true, pageNum, MAX_RECORD, si, 0);
             //----------添加推荐----------------------------------
-            int id; List<Recommend> recommendList = new ArrayList<Recommend>();
+            int id=-1; List<Recommend> recommendList = new ArrayList<Recommend>();
             if(retList.size()>0) {
                 id = (Integer) (retList.get(0).get("id"));
                 recommendList = newsService.getNewsRecommend(id);
@@ -46,7 +46,7 @@ public class NewsController {
                     if(recommendList.size()>=6) break;
                     int flag = 0;
                     for(Recommend cur:recommendList){
-                        if(re.getType() == cur.getType() && re.getId()==cur.getId()){
+                        if(re.getId()==id || (re.getType() == cur.getType() && re.getId()==cur.getId())){
                             flag = 1;
                             break;
                         }
