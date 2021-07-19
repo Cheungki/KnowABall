@@ -14,7 +14,6 @@ public class PlayerReturn {
     String imgURL;
     PlayerBaseInfo playerBaseInfo;
     List<PlayerInjuredData> playerInjuredDataList;
-    List<PlayerMatchData> playerMatchDataList;
     List<PlayerTransferData> playerTransferDataList;
     List<PlayerNewsTitles> playerNewsTitlesList;
 }

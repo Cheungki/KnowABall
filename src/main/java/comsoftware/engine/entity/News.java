@@ -14,15 +14,21 @@ public class News {
     @Id
     private int id;
 
+    private int article_id;
+
     private String url;
 
     private String title;
 
     private String author;
 
+    private String time;
+
     private String content;
 
     private String tags;
+
+    private String img_url;
 
     public int getId() {
         return id;

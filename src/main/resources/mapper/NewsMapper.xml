@@ -5,7 +5,7 @@
 
     <select id="getNewsById" resultType="comsoftware.engine.entity.News">
         select *
-        from `News`
+        from `News2`
         where `id` = #{id};
     </select>
 

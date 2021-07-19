@@ -355,4 +355,8 @@ public class PlayerService {
         return playerTags.getPlayerTags();
     }
 
+    public List<PlayerMatchData2> getPlayerMatchDataByType(int id, int type) {
+        return playerMapper.getPlayerMatchDataByType(id, type);
+    }
+
 }

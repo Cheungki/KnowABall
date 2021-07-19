@@ -105,11 +105,10 @@ public class PlayerController {
         String imgURL = getPlayerImgURL(id);
         PlayerBaseInfo playerBaseInfo = getPlayer(id);
         List<PlayerInjuredData> playerInjuredDataList = getPlayerInjuredData(id);
-        List<PlayerMatchData> playerMatchDataList = getPlayerMatchData(id);
         List<PlayerTransferData> playerTransferDataList = getPlayerTransferData(id);
         List<PlayerNewsTitles> playerNewsTitlesList = getPlayerNewsTitles(id);
-        return new PlayerReturn(200, imgURL, playerBaseInfo, playerInjuredDataList,
-                playerMatchDataList, playerTransferDataList, playerNewsTitlesList);
+        return new PlayerReturn(200, imgURL, playerBaseInfo, playerInjuredDataList
+                , playerTransferDataList, playerNewsTitlesList);
     }
 
 
@@ -118,4 +117,8 @@ public class PlayerController {
         return playerService.getPlayerHotWords(id);
     }
 
+    @RequestMapping(value = "/player/match/{id}/{type}", method = RequestMethod.GET)
+    public List<PlayerMatchData2> getPlayerMatchDataByType(@PathVariable int id, @PathVariable int type) {
+        return playerService.getPlayerMatchDataByType(id, type);
+    }
 }
