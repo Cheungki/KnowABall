@@ -95,9 +95,15 @@ _index_mappings = {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
             },
-            "englishName": {
-                "type": "text",
+            "nameSuggest":{
+                "type": "completion",
                 "analyzer": "ik_pinyin_analyzer"
+            },
+            "englishName": {
+                "type": "text"
+            },
+            "engSuggest":{
+                "type": "completion"
             },
             "capablity": {
                 "type": "integer"
@@ -149,7 +155,9 @@ for i in data:
         "birthday": i[10],
         "foot": i[11],
         "name": i[12],
+        "nameSuggest": i[12],
         "englishName": i[13],
+        "engSuggest": i[13],
         "capablity": i[14]
     }
     action = {"_index": "player", '_id': count, "_source": line}

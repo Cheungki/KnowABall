@@ -18,12 +18,16 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.convert.ThreeTenBackPortConverters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -193,6 +197,47 @@ public class PlayerService {
 
     }
 
+    public List<String> getSuggestCompletion(String suggestValue){
+        String suggestField = "nameSuggest";
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        CompletionSuggestionBuilder suggestionBuilderDistrict =
+                new CompletionSuggestionBuilder(suggestField).prefix(suggestValue).size(10);
+        SuggestBuilder suggestBuilder = new SuggestBuilder();
+        suggestBuilder.addSuggestion("player_name", suggestionBuilderDistrict);
+        searchSourceBuilder.suggest(suggestBuilder);
+        SearchRequest searchRequest = new SearchRequest("player");
+        //searchRequest.types(esType);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse response = null;
+        try {
+            response = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Suggest suggest = response.getSuggest();
+        List<String> keywords = new ArrayList<String>();
+        if (suggest != null) {
+            List<? extends Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> entries =
+                    suggest.getSuggestion("player_name").getEntries();
+            for (Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option> entry: entries) {
+                for (Suggest.Suggestion.Entry.Option option: entry.getOptions()) {
+                    String keyword = option.getText().string();
+                    if (!StringUtils.isEmpty(keyword)) {
+                        if (keywords.contains(keyword)) {
+                            continue;
+                        }
+                        keywords.add(keyword);
+                        if (keywords.size() >= 10) {
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+        return keywords;
+    }
+
 
     public List<Player> findPlayerByName(String name) {
         return playerRepository.findByName(name);
@@ -353,6 +398,10 @@ public class PlayerService {
         PlayerTags playerTags = playerMapper.getPlayerTag(id);
         System.out.println(playerTags.getTag());
         return playerTags.getPlayerTags();
+    }
+
+    public List<PlayerMatchData2> getPlayerMatchDataByType(int id, int type) {
+        return playerMapper.getPlayerMatchDataByType(id, type);
     }
 
 }

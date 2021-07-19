@@ -41,6 +41,11 @@ public class NewsController {
             return new SearchReturn(400, new SearchInfo(0L, 0L), new ArrayList<TotalData>());
         }
     }
+
+    @RequestMapping(value = "/search/suggest/news/{keyword}", method = RequestMethod.GET)
+    public List<String> getNewsSuggest(@PathVariable String keyword){
+        return newsService.getSuggestCompletion(keyword);
+    }
     //针对Elastic Search
     @RequestMapping(value = "/search/news/tag/{tag}", method = RequestMethod.GET)
     @ResponseBody

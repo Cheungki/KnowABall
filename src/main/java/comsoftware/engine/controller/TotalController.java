@@ -97,5 +97,48 @@ public class TotalController {
 
         }
     }
+
+    @RequestMapping(value = "/search/suggest/all/{keyword}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<Pair> getSuggestCompletion(@PathVariable String keyword) {
+        int num1 = 0, num2 = 0, num3 = 0;
+        //Map<String, Integer> map = new HashMap<String, Integer>();
+        List<Pair> pairList = new ArrayList<Pair>();
+        List<String> playerSuggest = playerService.getSuggestCompletion(keyword);
+        List<String> teamSuggest = teamService.getSuggestCompletion(keyword);
+        List<String> newsSuggest = newsService.getSuggestCompletion(keyword);
+        int size1 = playerSuggest.size(), size2 = teamSuggest.size(), size3 = newsSuggest.size();
+        int i, j, k;
+        for (i = 0; i < 4 && i < size1; i++) {
+            pairList.add(new Pair(1, playerSuggest.get(i)));
+        }
+        for (j = 0; j < 3 && j < size2; j++) {
+            pairList.add(new Pair(2, teamSuggest.get(j)));
+        }
+        for (k = 0; k < 3 && k < size3; k++) {
+            pairList.add(new Pair(3, newsSuggest.get(k)));
+        }
+        while (i < size1 && pairList.size() < 10) {
+            pairList.add(new Pair(1, playerSuggest.get(i)));
+            i++;
+        }
+        while (j < size2 && pairList.size() < 10) {
+            pairList.add(new Pair(2, teamSuggest.get(j)));
+            j++;
+        }
+        while (k < size3 && pairList.size() < 10) {
+            pairList.add(new Pair(3, newsSuggest.get(k)));
+            k++;
+        }
+        List<Pair> newPairList = new ArrayList<Pair>();
+        for (int s=1; s<=3; s++){
+            for (Pair p:pairList) {
+                if(p.getType() == s){
+                    newPairList.add(p);
+                }
+            }
+        }
+        return newPairList;
+    }
 }
 

@@ -42,6 +42,11 @@ public class TeamController {
             return new SearchReturn(400, new SearchInfo(0L, 0L), new ArrayList<TotalData>());
         }
     }
+
+    @RequestMapping(value = "/search/suggest/team/{keyword}", method = RequestMethod.GET)
+    public List<String> getTeamSuggest(@PathVariable String keyword){
+        return teamService.getSuggestCompletion(keyword);
+    }
     //针对Elastic Search
     @RequestMapping(value = "/search/team/name/{name}", method = RequestMethod.GET)
     @ResponseBody

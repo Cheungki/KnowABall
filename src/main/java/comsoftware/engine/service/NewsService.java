@@ -19,8 +19,12 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -159,6 +163,47 @@ public class NewsService {
 
         }
         return list;
+    }
+
+    public List<String> getSuggestCompletion(String suggestValue){
+        String suggestField = "titleSuggest";
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        CompletionSuggestionBuilder suggestionBuilderDistrict =
+                new CompletionSuggestionBuilder(suggestField).prefix(suggestValue).size(10);
+        SuggestBuilder suggestBuilder = new SuggestBuilder();
+        suggestBuilder.addSuggestion("news_title", suggestionBuilderDistrict);
+        searchSourceBuilder.suggest(suggestBuilder);
+        SearchRequest searchRequest = new SearchRequest("news");
+        //searchRequest.types(esType);
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse response = null;
+        try {
+            response = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Suggest suggest = response.getSuggest();
+        List<String> keywords = new ArrayList<String>();
+        if (suggest != null) {
+            List<? extends Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option>> entries =
+                    suggest.getSuggestion("news_title").getEntries();
+            for (Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option> entry: entries) {
+                for (Suggest.Suggestion.Entry.Option option: entry.getOptions()) {
+                    String keyword = option.getText().string();
+                    if (!StringUtils.isEmpty(keyword)) {
+                        if (keywords.contains(keyword)) {
+                            continue;
+                        }
+                        keywords.add(keyword);
+                        if (keywords.size() >= 10) {
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+        return keywords;
     }
 
     public List<News> findNewsByTag(String tag) {

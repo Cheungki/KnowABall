@@ -55,4 +55,10 @@
         where playerId = #{id};
     </select>
 
+    <select id="getPlayerMatchDataByType" resultType="comsoftware.engine.entity.PlayerMatchData2">
+        select *
+        from `PlayerMatchData2`
+        where `playerId` = #{id} and `type` = #{type};
+    </select>
+
 </mapper>

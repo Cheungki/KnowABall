@@ -86,6 +86,10 @@ _index_mappings = {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
             },
+            "nameSuggest": {
+                "type": "completion",
+                "analyzer": "ik_pinyin_analyzer"
+            },
             "englishName": {
                 "type": "text"
             },
@@ -137,6 +141,7 @@ for i in data:
         "phone": i[7],
         "email": i[8],
         "name": i[9],
+        "nameSuggest": i[9],
         "englishName": i[10],
         "address": i[11]
     }

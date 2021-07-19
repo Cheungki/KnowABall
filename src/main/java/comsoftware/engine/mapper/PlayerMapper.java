@@ -25,4 +25,6 @@ public interface PlayerMapper {
     PlayerTags getPlayerTag(int id);
 
     List<PlayerHonorRecord> getPlayerHonorRecord(int id);
+
+    List<PlayerMatchData2> getPlayerMatchDataByType(int id, int type);
 }

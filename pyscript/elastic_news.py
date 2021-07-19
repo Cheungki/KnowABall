@@ -61,6 +61,10 @@ _index_mappings = {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
             },
+            "titleSuggest": {
+                "type": "completion",
+                "analyzer": "ik_pinyin_analyzer"
+            },
             "author": {
                 "type": "text",
                 "analyzer": "ik_pinyin_analyzer"
@@ -107,6 +111,7 @@ for i in data:
         "article_id": i[1],
         "url": i[2],
         "title": i[3],
+        "titleSuggest": i[3],
         "author": i[4],
         "time": i[5],
         "content": i[6],
