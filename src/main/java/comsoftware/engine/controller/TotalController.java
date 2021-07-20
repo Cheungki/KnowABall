@@ -7,8 +7,10 @@ import comsoftware.engine.service.TeamService;
 import comsoftware.engine.service.NewsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +19,9 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 public class TotalController {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private PlayerService playerService;
@@ -137,6 +142,23 @@ public class TotalController {
             return "皇家马德里 马德里竞技 瓦伦西亚";
         }
         return "主人，懂球小蜜没有找到答案~ QAQ";
+    }
+
+    @RequestMapping(value = "/getHotWords", method = RequestMethod.GET)
+    @ResponseBody
+    public List<String> getHotWords(){
+        HotWords wordList = (HotWords) redisTemplate.opsForValue().get("hotWords");
+        if(wordList==null){
+            wordList = new HotWords();
+            wordList = new HotWords();
+            wordList.addWord("巴塞罗那");  wordList.addWord("皇家马德里");
+            wordList.addWord("C罗");    wordList.addWord("拜仁慕尼黑");
+            wordList.addWord("内马尔");  wordList.addWord("姆巴佩");
+            wordList.addWord("曼城");  wordList.addWord("德布劳内");
+            wordList.addWord("尤文图斯");  wordList.addWord("莱万多夫斯基");
+            redisTemplate.opsForValue().set("hotWords", wordList);
+        }
+        return wordList.getWords();
     }
 
     @RequestMapping(value = "/search/suggest/all/{keyword}", method = RequestMethod.GET)

@@ -10,13 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.*;
 
 @CrossOrigin
 @RestController
 public class PlayerController {
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Autowired
     private PlayerService playerService;
@@ -169,6 +174,10 @@ public class PlayerController {
             }
             newRecommendList = recommendList;
         }
+        HotWords hw = (HotWords) redisTemplate.opsForValue().get("hotWords");
+        String name = playerBaseInfo.getName();
+        hw.addWord(name);
+        redisTemplate.opsForValue().set("hotWords", hw);
         return new PlayerReturn(200, imgURL, playerBaseInfo, playerInjuredDataList
                     , playerTransferDataList, playerNewsTitlesList, newRecommendList);
 

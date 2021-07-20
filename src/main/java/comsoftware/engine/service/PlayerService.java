@@ -114,7 +114,7 @@ public class PlayerService {
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(300)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("80%"),
-                                ScoreFunctionBuilders.weightFactorFunction(400)));
+                                ScoreFunctionBuilders.weightFactorFunction(750)));
                 newBoolQueryBuilder.should(qb);
             }
             else{
@@ -133,7 +133,7 @@ public class PlayerService {
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(300)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("100%"),
-                                    ScoreFunctionBuilders.weightFactorFunction(400)));
+                                    ScoreFunctionBuilders.weightFactorFunction(750)));
 
                 }
                 else{

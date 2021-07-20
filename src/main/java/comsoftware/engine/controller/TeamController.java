@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,6 +22,9 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 public class TeamController {
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Autowired
     private TeamService teamService;
 
@@ -153,6 +158,10 @@ public class TeamController {
             }
             newRecommendList = recommendList;
         }
+        HotWords hw = (HotWords) redisTemplate.opsForValue().get("hotWords");
+        String name = teamBaseInfo.getName();
+        hw.addWord(name);
+        redisTemplate.opsForValue().set("hotWords", hw);
         return new TeamReturn(200, imgURL, teamBaseInfo, teamRelatedPersonList, teamHonorRecordList, newRecommendList);
     }
 
