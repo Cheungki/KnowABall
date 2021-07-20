@@ -20,7 +20,7 @@ public class HotWords implements Serializable {
         }
         if(words.size()<10) words.add(word);
         else {
-            while (words.size()<10) {
+            while (words.size()>=10) {
                 words.remove(words.size()-1);
             }
             words.add(0, word);
