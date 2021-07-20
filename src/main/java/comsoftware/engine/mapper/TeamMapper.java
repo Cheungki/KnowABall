@@ -2,6 +2,7 @@ package comsoftware.engine.mapper;
 
 import comsoftware.engine.entity.TeamBaseInfo;
 import comsoftware.engine.entity.TeamHonorRecord;
+import comsoftware.engine.entity.TeamNews;
 import comsoftware.engine.entity.TeamRelatedPerson;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,6 @@ public interface TeamMapper {
     List<TeamRelatedPerson> getTeamPerson(int id);
 
     List<String> getTeamByCountry(int id, String country);
+
+    TeamNews getTeamNews(int id);
 }

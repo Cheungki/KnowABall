@@ -161,4 +161,9 @@ public class TeamController {
         return teamService.getTeamKnowledgeGraph(id);
     }
 
+    @RequestMapping(value = "/team/news/{id}", method = RequestMethod.GET)
+    public List<TeamNews> getTeamNews(@PathVariable int id) {
+        return teamService.getTeamNews(id);
+    }
+
 }

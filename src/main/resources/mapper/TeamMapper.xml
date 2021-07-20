@@ -31,4 +31,10 @@
         where country = #{country} and id != #{id};
     </select>
 
+    <select id="getTeamNews" resultType="comsoftware.engine.entity.TeamNews">
+        select titles, urls, img_urls
+        from `TeamNews`
+        where `teamId` = #{id};
+    </select>
+
 </mapper>

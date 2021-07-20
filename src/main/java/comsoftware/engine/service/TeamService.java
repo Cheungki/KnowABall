@@ -258,7 +258,8 @@ public class TeamService {
             List<Player> players = playerService.findPlayerByName(pName);
             if(players.size()>0 && recommendList.size()<6){
                 Player p = players.get(0);
-                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+                if(p.getId() != id)
+                    recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
             }
         }
         Collections.shuffle(recommendList);
@@ -339,6 +340,19 @@ public class TeamService {
         }
         result.put("nodes", nodes);
         result.put("edges", edges);
+        return result;
+    }
+
+    public List<TeamNews> getTeamNews(int id) {
+        TeamNews teamNews = teamMapper.getTeamNews(id);
+        String[] titles = teamNews.getTitles().split("&&");
+        String[] urls = teamNews.getUrls().split("&&");
+        String[] imgs = teamNews.getImg_urls().split("&&");
+        List<TeamNews> result = new ArrayList<>();
+        int num = Math.min(10, titles.length);
+        for (int i = 0; i < num; i ++) {
+            result.add(new TeamNews(titles[i], urls[i], imgs[i]));
+        }
         return result;
     }
 

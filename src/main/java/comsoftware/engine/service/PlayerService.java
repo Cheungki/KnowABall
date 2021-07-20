@@ -49,6 +49,10 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     @Autowired
+    private TeamService teamService;
+
+
+    @Autowired
     private RestHighLevelClient client;
 
     public List<Map<String,Object>> complexPlayerSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si) throws IOException {
@@ -320,8 +324,10 @@ public class PlayerService {
         PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);
         int team = playerBaseInfo.getTeamId();
         TeamBaseInfo teamBaseInfo = teamMapper.getTeamBaseInfo(team);
+        String imgURL = teamService.getTeamImgURL(team);
         if(recommendList.size()<6){
-            recommendList.add(new Recommend(2, teamBaseInfo.getId(), teamBaseInfo.getName(), teamBaseInfo.getImgURL()));
+            if(teamBaseInfo.getId()!=id)
+                recommendList.add(new Recommend(2, teamBaseInfo.getId(), teamBaseInfo.getName(), imgURL));
         }
         List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(team);
         for(TeamRelatedPerson person:persons){
@@ -329,7 +335,8 @@ public class PlayerService {
             List<Player> players = findPlayerByName(pName);
             if(players.size()>0 && recommendList.size()<6){
                 Player p = players.get(0);
-                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+                if(p.getId() != id)
+                    recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
             }
         }
         Collections.shuffle(recommendList);
@@ -405,15 +412,19 @@ public class PlayerService {
     public List<HotWord> getPlayerHotWords(int id) {
         List<HotWord> result = playerMapper.getPlayerHotWords(id);
         List<String> tags = getPlayerTags(id);
-        for (String tag: tags) {
-            result.add(new HotWord(tag, 30));
+        if (tags != null) {
+            for (String tag: tags) {
+                result.add(new HotWord(tag, 30));
+            }
         }
         return result;
     }
 
     public List<String> getPlayerTags(int id) {
         PlayerTags playerTags = playerMapper.getPlayerTag(id);
-        System.out.println(playerTags.getTag());
+        if (playerTags == null) {
+            return null;
+        }
         return playerTags.getPlayerTags();
     }
 
@@ -427,7 +438,8 @@ public class PlayerService {
         String[] url = all.getUrls().split("&&");
         String[] img = all.getImg_urls().split("&&");
         List<PlayerNews> result = new ArrayList<>();
-        for (int i = 0; i < title.length; i ++) {
+        int maxSize = Math.min(5, title.length);
+        for (int i = 0; i < maxSize; i ++) {
             result.add(new PlayerNews(title[i], url[i], img[i]));
         }
         return result;
