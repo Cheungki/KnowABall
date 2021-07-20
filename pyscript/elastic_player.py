@@ -22,7 +22,7 @@ _index_mappings = {
                 "analyzer":{
                     "ik_pinyin_analyzer":{
                         "type":"custom",
-                        "tokenizer":"ik_smart",
+                        "tokenizer":"ik_max_word",
                         "filter":"pinyin_filter"
                     },
                     "pinyin_analyzer" : {
@@ -32,8 +32,12 @@ _index_mappings = {
                 },
                 "filter":{
                     "pinyin_filter":{
-                        "type":"pinyin",
-                        "keep_first_letter": False
+                        "type": "pinyin",
+                        "keep_first_letter": False,
+                        "keep_joined_full_pinyin": False,
+                        "keep_separate_first_letter": False,
+                        "none_chinese_pinyin_tokenize": True,
+                        "keep_full_pinyin": True
                     }
                 },
                 "tokenizer" : {
@@ -93,7 +97,13 @@ _index_mappings = {
             },
             "name": {
                 "type": "text",
-                "analyzer": "ik_pinyin_analyzer"
+                "analyzer": "ik_pinyin_analyzer",
+                "fields": {
+                    "pinyin":{
+                        "type":"text",
+                        "analyzer": "ik_pinyin_analyzer"
+                    }
+                }
             },
             "nameSuggest":{
                 "type": "completion",

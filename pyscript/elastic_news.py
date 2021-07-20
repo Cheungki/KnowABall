@@ -32,8 +32,12 @@ _index_mappings = {
                 },
                 "filter":{
                     "pinyin_filter":{
-                        "type":"pinyin",
-                        "keep_first_letter": False
+                        "type": "pinyin",
+                        "keep_first_letter": False,
+                        "keep_joined_full_pinyin": False,
+                        "keep_separate_first_letter": False,
+                        "none_chinese_pinyin_tokenize": True,
+                        "keep_full_pinyin": True
                     }
                 },
                 "tokenizer" : {
@@ -59,7 +63,13 @@ _index_mappings = {
             },
             "title": {
                 "type": "text",
-                "analyzer": "ik_pinyin_analyzer"
+                "analyzer": "ik_pinyin_analyzer",
+                "fields": {
+                    "pinyin":{
+                        "type":"text",
+                        "analyzer": "ik_pinyin_analyzer"
+                    }
+                }
             },
             "titleSuggest": {
                 "type": "completion",
@@ -78,7 +88,13 @@ _index_mappings = {
             },
             "tags": {
                 "type": "text",
-                "analyzer": "ik_pinyin_analyzer"
+                "analyzer": "ik_pinyin_analyzer",
+                "fields": {
+                    "pinyin":{
+                        "type":"text",
+                        "analyzer": "ik_pinyin_analyzer"
+                    }
+                }
             },
             "img_url": {
                 "type": "keyword"

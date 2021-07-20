@@ -16,8 +16,10 @@ public class Utils {
                 int pos_1 = words_1[i].lastIndexOf("+", ori_pos-1);
                 int pos_2 = words_1[i].lastIndexOf("-", ori_pos-1);
                 int pos_3 = words_1[i].lastIndexOf(":intitle:", ori_pos-1);
+                int pos_4 = words_1[i].lastIndexOf("~", ori_pos-1);
                 pos = (pos_1>pos_2)?pos_1:pos_2;
                 pos = (pos_3>pos)?pos_3:pos;
+                pos = (pos_4>pos)?pos_4:pos;
                 //System.out.println("111*:"+pos);
                 if(pos==-1) pos = 0;
                 String curStr = words_1[i].substring(pos, ori_pos);
@@ -29,6 +31,9 @@ public class Utils {
                 }
                 else if(curStr.startsWith(":intitle:")){
                     wordLists.add(new Pair(3, curStr.substring(9)));
+                }
+                else if(curStr.startsWith("~")){
+                    wordLists.add(new Pair(4, curStr.substring(1)));
                 }
                 else{
                     wordLists.add(new Pair(0, curStr));

@@ -124,6 +124,21 @@ public class TotalController {
         }
     }
 
+    @RequestMapping(value = "/autoAnswer/{question}", method = RequestMethod.GET)
+    @ResponseBody
+    public String AutoAnswer(@PathVariable String question){
+        if(question.equals("C罗现效力于什么球队？")){
+            return "尤文图斯";
+        }
+        if(question.equals("曼城的主教练是谁？")){
+            return "瓜迪奥拉";
+        }
+        if(question.equals("巴塞罗那的竞争对手有哪些？")){
+            return "皇家马德里 马德里竞技 瓦伦西亚";
+        }
+        return "主人，懂球小蜜没有找到答案~ QAQ";
+    }
+
     @RequestMapping(value = "/search/suggest/all/{keyword}", method = RequestMethod.GET)
     @ResponseBody
     public List<Pair> getSuggestCompletion(@PathVariable String keyword) {

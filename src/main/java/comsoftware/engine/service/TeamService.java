@@ -52,6 +52,7 @@ public class TeamService {
         //NativeSearchQueryBuilder searchQuery = new NativeSearchQueryBuilder();
         SearchRequest searchRequest = new SearchRequest("team");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder newBoolQueryBuilder = null;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.from((page-1)*size);
         searchSourceBuilder.size(size);
@@ -92,27 +93,85 @@ public class TeamService {
                         .should(QueryBuilders.matchPhraseQuery("englishName", kw));
                 boolQueryBuilder.must(qb);
             }
-            else{
-                BoolQueryBuilder qb = QueryBuilders.boolQuery()
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw),
+            else if(wordsList.get(i).getType() == 4){
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
+                BoolQueryBuilder qb = null;
+                qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("10%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
+                        //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("10%"),
+                        //        ScoreFunctionBuilders.weightFactorFunction(300)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(500)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(300)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("city", kw).minimumShouldMatch("100%"),
-                                ScoreFunctionBuilders.weightFactorFunction(300)));
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("city", kw).minimumShouldMatch("80%"),
+                                ScoreFunctionBuilders.weightFactorFunction(300)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("80%"),
+                                ScoreFunctionBuilders.weightFactorFunction(250)));
+                newBoolQueryBuilder.should(qb);
+            }
+            else{
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
+                BoolQueryBuilder qb = null;
                 if(isUnique){
-                    qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("100%"),
-                            ScoreFunctionBuilders.weightFactorFunction(250)));
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("70%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("city", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(250)));
                 }
+                else{
+                    /*
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("name", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("name.fields.pinyin", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(200)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("englishName", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("stadium", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("country", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("city", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)));
+                     */
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("city", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("audience", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(250)));
 
-                boolQueryBuilder.must(qb);
+                }
+                newBoolQueryBuilder.should(qb);
             }
         }
-
+        if(newBoolQueryBuilder!=null) boolQueryBuilder.must(newBoolQueryBuilder);
+        //BoolQueryBuilder bqb = boolQueryBuilder;
+        //if(bqb!=null) boolQueryBuilder.must(bqb);
         if(!_country.equals("all")){
             boolQueryBuilder.filter(QueryBuilders.matchPhraseQuery("country", _country));
         }
@@ -238,6 +297,7 @@ public class TeamService {
             for (Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option> entry: entries) {
                 for (Suggest.Suggestion.Entry.Option option: entry.getOptions()) {
                     String keyword = option.getText().string();
+                    keyword.replace("-", "");
                     if (!StringUtils.isEmpty(keyword)) {
                         if (keywords.contains(keyword)) {
                             continue;

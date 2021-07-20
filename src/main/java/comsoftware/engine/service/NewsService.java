@@ -56,6 +56,7 @@ public class NewsService {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("news");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder newBoolQueryBuilder = null;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.from((page-1)*size+bias);
         searchSourceBuilder.size(size);
@@ -83,21 +84,66 @@ public class NewsService {
                         .should(QueryBuilders.matchPhraseQuery("title", kw));
                 boolQueryBuilder.must(qb);
             }
-            else{
+            else if(wordsList.get(i).getType() == 4){
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
                 BoolQueryBuilder qb = QueryBuilders.boolQuery()
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title", kw).minimumShouldMatch("100%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title", kw).minimumShouldMatch("50%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags", kw).minimumShouldMatch("100%"),
+                        //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title.field.pinyin", kw).minimumShouldMatch("50%"),
+                        //        ScoreFunctionBuilders.weightFactorFunction(200)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags", kw).minimumShouldMatch("30%"),
                                 ScoreFunctionBuilders.weightFactorFunction(800)))
+                        //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags.field.pinyin", kw).minimumShouldMatch("100%"),
+                        //        ScoreFunctionBuilders.weightFactorFunction(160)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("author", kw).minimumShouldMatch("100%"),
                                 ScoreFunctionBuilders.weightFactorFunction(300)))
                         //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("content", kw).minimumShouldMatch("100%"),
                         //        ScoreFunctionBuilders.weightFactorFunction(600)));
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("content", kw),
                                 ScoreFunctionBuilders.weightFactorFunction(600)));
-                boolQueryBuilder.should(qb);
+                newBoolQueryBuilder.should(qb);
+            }
+            else{
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
+                BoolQueryBuilder qb = null;
+                if(isUnique) {
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title", kw).minimumShouldMatch("80%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title.field.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags", kw).minimumShouldMatch("80%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(800)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags.field.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(240)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("author", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("content", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(600)));
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("content", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(600)));
+                }
+                else{
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("title.field.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(800)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("tags.field.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(240)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("author", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("content", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(600)));
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("content", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(600)));
+                }
+                newBoolQueryBuilder.should(qb);
             }
         }
+        boolQueryBuilder.must(newBoolQueryBuilder);
         if(_sort!=-1){
             FieldSortBuilder timeSort = SortBuilders.fieldSort("time").order(SortOrder.DESC);
             searchSourceBuilder.sort(timeSort);
@@ -202,6 +248,7 @@ public class NewsService {
             for (Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option> entry: entries) {
                 for (Suggest.Suggestion.Entry.Option option: entry.getOptions()) {
                     String keyword = option.getText().string();
+                    keyword.replace("-", "");
                     if (!StringUtils.isEmpty(keyword)) {
                         if (keywords.contains(keyword)) {
                             continue;

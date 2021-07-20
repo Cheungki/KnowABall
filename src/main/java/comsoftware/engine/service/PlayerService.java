@@ -63,6 +63,7 @@ public class PlayerService {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("player");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder newBoolQueryBuilder = null;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.from((page-1)*size);
         searchSourceBuilder.size(size);
@@ -98,23 +99,75 @@ public class PlayerService {
                         .should(QueryBuilders.matchPhraseQuery("englishName", kw));
                 boolQueryBuilder.must(qb);
             }
-            else{
-                BoolQueryBuilder qb = QueryBuilders.boolQuery()
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
+            else if(wordsList.get(i).getType() == 4){
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
+                BoolQueryBuilder qb = null;
+                qb = QueryBuilders.boolQuery()
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("10%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
+                        //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.field.pinyin", kw).minimumShouldMatch("10%"),
+                        //        ScoreFunctionBuilders.weightFactorFunction(200)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("10%"),
                                 ScoreFunctionBuilders.weightFactorFunction(1000)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("70%"),
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(500)))
-                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("70%"),
-                                ScoreFunctionBuilders.weightFactorFunction(300)));
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("80%"),
+                                ScoreFunctionBuilders.weightFactorFunction(300)))
+                        .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("80%"),
+                                ScoreFunctionBuilders.weightFactorFunction(400)));
+                newBoolQueryBuilder.should(qb);
+            }
+            else{
+                if(newBoolQueryBuilder==null)   newBoolQueryBuilder = QueryBuilders.boolQuery();
+                BoolQueryBuilder qb = null;
                 if(isUnique){
-                    qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("70%"),
-                            ScoreFunctionBuilders.weightFactorFunction(400)));
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.field.pinyin", kw).minimumShouldMatch("100%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(200)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(400)));
+
                 }
-                boolQueryBuilder.must(qb);
+                else{
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.field.pinyin", kw).minimumShouldMatch("70%"),
+                            //        ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("100%"),
+                                    ScoreFunctionBuilders.weightFactorFunction(400)));
+                    /*
+                    qb = QueryBuilders.boolQuery()
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("name", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("name.field.pinyin", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(200)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("englishName", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("role", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(500)))
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchPhraseQuery("country", kw),
+                                    ScoreFunctionBuilders.weightFactorFunction(300)));
+                     */
+                }
+                newBoolQueryBuilder.should(qb);
             }
         }
+        boolQueryBuilder.must(newBoolQueryBuilder);
 
         if(_foot!=-1){
             boolQueryBuilder.filter(QueryBuilders.termQuery("foot", _foot));
@@ -151,8 +204,6 @@ public class PlayerService {
                 .Field("englishName")); // 高亮字段
         fields.add(new HighlightBuilder
                 .Field("country")); // 高亮字段
-        fields.add(new HighlightBuilder
-                .Field("role")); // 高亮字段
         if(isUnique){
             fields.add(new HighlightBuilder
                     .Field("club"));
@@ -173,7 +224,6 @@ public class PlayerService {
             HighlightField name = highlightFields.get("name");
             HighlightField englishName = highlightFields.get("englishName");
             HighlightField country = highlightFields.get("country");
-            HighlightField role = highlightFields.get("role");
             HighlightField club = null;
             if(isUnique){
                 club = highlightFields.get("club");
@@ -203,14 +253,6 @@ public class PlayerService {
                     newCountry += fragment;
                 }
                 sourceAsMap.put("country", newCountry);
-            }
-            if (role != null) {
-                Text[] fragments = role.fragments();
-                String newRole = "";
-                for (Text fragment : fragments) {
-                    newRole += fragment;
-                }
-                sourceAsMap.put("role", newRole);
             }
             if(isUnique && club!=null){
                 Text[] fragments = club.fragments();
@@ -252,6 +294,7 @@ public class PlayerService {
             for (Suggest.Suggestion.Entry<? extends Suggest.Suggestion.Entry.Option> entry: entries) {
                 for (Suggest.Suggestion.Entry.Option option: entry.getOptions()) {
                     String keyword = option.getText().string();
+                    keyword.replace("-", "");
                     if (!StringUtils.isEmpty(keyword)) {
                         if (keywords.contains(keyword)) {
                             continue;
