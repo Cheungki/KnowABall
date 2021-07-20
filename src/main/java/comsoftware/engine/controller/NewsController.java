@@ -27,13 +27,13 @@ public class NewsController {
 
     static int MAX_RECORD = 10;
 
-    @RequestMapping(value = "/search/news/{keyword}/{pageNum}", method = RequestMethod.GET)
-    public SearchReturn ComplexNewsSearch(@PathVariable String keyword, @PathVariable int pageNum) {
+    @RequestMapping(value = "/search/news/{keyword}/{sort}/{pageNum}", method = RequestMethod.GET)
+    public SearchReturn ComplexNewsSearch(@PathVariable String keyword, @PathVariable int pageNum, @PathVariable int sort) {
         try {
             int totalNum = 0;
             List<TotalData> dataList = new ArrayList<TotalData>();
             SearchInfo si = new SearchInfo(0L, 0L);
-            List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true, pageNum, MAX_RECORD, si, 0);
+            List<Map<String, Object>> retList = newsService.complexNewsSearch(keyword, true, pageNum, MAX_RECORD, si, 0, sort);
             //----------添加推荐----------------------------------
             int id=-1; List<Recommend> recommendList = new ArrayList<Recommend>();
             if(retList.size()>0) {

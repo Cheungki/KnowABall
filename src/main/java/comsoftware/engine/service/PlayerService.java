@@ -18,6 +18,9 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
@@ -49,9 +52,14 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     @Autowired
+    private TeamService teamService;
+
+
+    @Autowired
     private RestHighLevelClient client;
 
-    public List<Map<String,Object>> complexPlayerSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si) throws IOException {
+    public List<Map<String,Object>> complexPlayerSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si,
+                                                        int _foot, String _role, String _country, int _age, int _sort) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("player");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -104,8 +112,33 @@ public class PlayerService {
                     qb.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("club", kw).minimumShouldMatch("70%"),
                             ScoreFunctionBuilders.weightFactorFunction(400)));
                 }
-                boolQueryBuilder.should(qb);
+                boolQueryBuilder.must(qb);
             }
+        }
+
+        if(_foot!=-1){
+            boolQueryBuilder.filter(QueryBuilders.termQuery("foot", _foot));
+        }
+        if(!_role.equals("all")){
+            boolQueryBuilder.filter(QueryBuilders.matchPhraseQuery("role", _role));
+        }
+        if(!_country.equals("all")){
+            boolQueryBuilder.filter(QueryBuilders.matchPhraseQuery("country", _country));
+        }
+        if(_age!=-1){
+            if(_age==0)
+                boolQueryBuilder.filter(QueryBuilders.rangeQuery("age").lte(20));
+            else if(_age==1)
+                boolQueryBuilder.filter(QueryBuilders.rangeQuery("age").from(20).to(25));
+            else if(_age==2)
+                boolQueryBuilder.filter(QueryBuilders.rangeQuery("age").from(25).to(30));
+            else
+                boolQueryBuilder.filter(QueryBuilders.rangeQuery("age").gte(30));
+        }
+        if(_sort!=-1){
+            FieldSortBuilder ageSort = SortBuilders.fieldSort("age").order(SortOrder.ASC);
+            searchSourceBuilder.sort(ageSort);
+
         }
 
         HighlightBuilder highlightBuilder = new HighlightBuilder();
@@ -320,8 +353,10 @@ public class PlayerService {
         PlayerBaseInfo playerBaseInfo = getPlayerBaseInfo(id);
         int team = playerBaseInfo.getTeamId();
         TeamBaseInfo teamBaseInfo = teamMapper.getTeamBaseInfo(team);
+        String imgURL = teamService.getTeamImgURL(team);
         if(recommendList.size()<6){
-            recommendList.add(new Recommend(2, teamBaseInfo.getId(), teamBaseInfo.getName(), teamBaseInfo.getImgURL()));
+            if(teamBaseInfo.getId()!=id)
+                recommendList.add(new Recommend(2, teamBaseInfo.getId(), teamBaseInfo.getName(), imgURL));
         }
         List<TeamRelatedPerson> persons = teamMapper.getTeamPerson(team);
         for(TeamRelatedPerson person:persons){
@@ -329,7 +364,8 @@ public class PlayerService {
             List<Player> players = findPlayerByName(pName);
             if(players.size()>0 && recommendList.size()<6){
                 Player p = players.get(0);
-                recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
+                if(p.getId() != id)
+                    recommendList.add(new Recommend(1, p.getId(), p.getName(), p.getImgURL()));
             }
         }
         Collections.shuffle(recommendList);
@@ -405,20 +441,37 @@ public class PlayerService {
     public List<HotWord> getPlayerHotWords(int id) {
         List<HotWord> result = playerMapper.getPlayerHotWords(id);
         List<String> tags = getPlayerTags(id);
-        for (String tag: tags) {
-            result.add(new HotWord(tag, 30));
+        if (tags != null) {
+            for (String tag: tags) {
+                result.add(new HotWord(tag, 30));
+            }
         }
         return result;
     }
 
     public List<String> getPlayerTags(int id) {
         PlayerTags playerTags = playerMapper.getPlayerTag(id);
-        System.out.println(playerTags.getTag());
+        if (playerTags == null) {
+            return null;
+        }
         return playerTags.getPlayerTags();
     }
 
     public List<PlayerMatchData2> getPlayerMatchDataByType(int id, int type) {
         return playerMapper.getPlayerMatchDataByType(id, type);
+    }
+
+    public List<PlayerNews> getPlayerNews(int id) {
+        PlayerNews all = playerMapper.getPlayerNews(id);
+        String[] title = all.getTitles().split("&&");
+        String[] url = all.getUrls().split("&&");
+        String[] img = all.getImg_urls().split("&&");
+        List<PlayerNews> result = new ArrayList<>();
+        int maxSize = Math.min(5, title.length);
+        for (int i = 0; i < maxSize; i ++) {
+            result.add(new PlayerNews(title[i], url[i], img[i]));
+        }
+        return result;
     }
 
 }

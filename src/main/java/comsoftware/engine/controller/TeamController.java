@@ -28,13 +28,13 @@ public class TeamController {
 
     static int MAX_RECORD = 10;
 
-    @RequestMapping(value = "/search/team/{keyword}/{pageNum}", method = RequestMethod.GET)
-    public SearchReturn ComplexTeamSearch(@PathVariable String keyword, @PathVariable int pageNum) {
+    @RequestMapping(value = "/search/team/{keyword}/{country}/{pageNum}", method = RequestMethod.GET)
+    public SearchReturn ComplexTeamSearch(@PathVariable String keyword, @PathVariable int pageNum, @PathVariable String country) {
         try {
             int totalNum = 0;
             List<TotalData> dataList = new ArrayList<TotalData>();
             SearchInfo si = new SearchInfo(0L, 0L);
-            List<Map<String, Object>> retList = teamService.complexTeamSearch(keyword, true, pageNum, MAX_RECORD, si);
+            List<Map<String, Object>> retList = teamService.complexTeamSearch(keyword, true, pageNum, MAX_RECORD, si, country);
             //----------添加推荐----------------------------------
             int id=-1; List<Recommend> recommendList = new ArrayList<Recommend>();
             if(retList.size()>0) {
@@ -159,6 +159,11 @@ public class TeamController {
     @RequestMapping(value = "/team/kg/{id}", method = RequestMethod.GET)
     public Map<String, Object> getTeamKnowledgeGraph(@PathVariable int id) {
         return teamService.getTeamKnowledgeGraph(id);
+    }
+
+    @RequestMapping(value = "/team/news/{id}", method = RequestMethod.GET)
+    public List<TeamNews> getTeamNews(@PathVariable int id) {
+        return teamService.getTeamNews(id);
     }
 
 }

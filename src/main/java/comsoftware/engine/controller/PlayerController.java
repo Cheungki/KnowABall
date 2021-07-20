@@ -25,13 +25,17 @@ public class PlayerController {
     private List<Recommend> defaultRe;
     static int MAX_RECORD = 10;
 
-    @RequestMapping(value = "/search/player/{keyword}/{pageNum}", method = RequestMethod.GET)
-    public SearchReturn ComplexPlayerSearch(@PathVariable String keyword, @PathVariable int pageNum) {
+    @RequestMapping(value = "/search/player/{keyword}/{foot}/{role}/{country}/{age}/{sort}/{pageNum}", method = RequestMethod.GET)
+    public SearchReturn ComplexPlayerSearch(@PathVariable String keyword, @PathVariable int pageNum, @PathVariable int foot,
+                                            @PathVariable String role, @PathVariable int age, @PathVariable int sort,  @PathVariable String country) {
         try {
+
+            //                                                        String _foot, String _role, String _country, int _age, int _sort
             int totalNum = 0;
             List<TotalData> dataList = new ArrayList<TotalData>();
             SearchInfo si = new SearchInfo(0L, 0L);
-            List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true, pageNum, MAX_RECORD, si);
+            List<Map<String, Object>> retList = playerService.complexPlayerSearch(keyword, true, pageNum, MAX_RECORD, si,
+                    foot, role, country, age, sort);
             //----------添加推荐----------------------------------
             int id=-1; List<Recommend> recommendList = new ArrayList<Recommend>();
             if(retList.size()>0) {
@@ -179,5 +183,10 @@ public class PlayerController {
     @RequestMapping(value = "/player/match/{id}/{type}", method = RequestMethod.GET)
     public List<PlayerMatchData2> getPlayerMatchDataByType(@PathVariable int id, @PathVariable int type) {
         return playerService.getPlayerMatchDataByType(id, type);
+    }
+
+    @RequestMapping(value = "/player/news/{id}", method = RequestMethod.GET)
+    public List<PlayerNews> getPlayerNews(@PathVariable int id) {
+        return playerService.getPlayerNews(id);
     }
 }

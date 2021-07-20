@@ -17,6 +17,9 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
@@ -49,7 +52,7 @@ public class NewsService {
     @Autowired
     private TeamService teamService;
 
-    public List<Map<String,Object>> complexNewsSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si, int bias) throws IOException {
+    public List<Map<String,Object>> complexNewsSearch(String keyword, boolean isUnique, int page, int size, SearchInfo si, int bias, int _sort) throws IOException {
         ArrayList<Pair> wordsList = Utils.getAllKeywords(keyword);
         SearchRequest searchRequest = new SearchRequest("news");
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -94,6 +97,11 @@ public class NewsService {
                                 ScoreFunctionBuilders.weightFactorFunction(600)));
                 boolQueryBuilder.should(qb);
             }
+        }
+        if(_sort!=-1){
+            FieldSortBuilder timeSort = SortBuilders.fieldSort("time").order(SortOrder.DESC);
+            searchSourceBuilder.sort(timeSort);
+
         }
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.preTags("<span style=\"color:red\">"); // 高亮前缀

@@ -27,4 +27,6 @@ public interface PlayerMapper {
     List<PlayerHonorRecord> getPlayerHonorRecord(int id);
 
     List<PlayerMatchData2> getPlayerMatchDataByType(int id, int type);
+
+    PlayerNews getPlayerNews(int id);
 }

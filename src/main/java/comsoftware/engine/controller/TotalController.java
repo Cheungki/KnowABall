@@ -39,7 +39,8 @@ public class TotalController {
             int type1_2_num = 0;
             List<TotalData> allDataList = new ArrayList<TotalData>();
             SearchInfo si = new SearchInfo(0L, 0L);
-            List<Map<String, Object>> playerList = playerService.complexPlayerSearch(keyword, false, 1, MAX_RECORD, si);
+            List<Map<String, Object>> playerList = playerService.complexPlayerSearch(keyword, false, 1, MAX_RECORD, si,
+                    -1, "all", "all", -1, -1);
             if (playerList.size() > 0) {
                 int maxNum = (playerList.size() > 5) ? 5 : playerList.size();
                 type1_2_num += maxNum;
@@ -50,7 +51,7 @@ public class TotalController {
                 }
             }
             System.out.println(playerList.size());
-            List<Map<String, Object>> teamList = teamService.complexTeamSearch(keyword, false,1, MAX_RECORD, si);
+            List<Map<String, Object>> teamList = teamService.complexTeamSearch(keyword, false,1, MAX_RECORD, si, "all");
             if (teamList.size() > 0) {
                 int maxNum = (teamList.size() > 5) ? 5 : teamList.size();
                 type1_2_num += maxNum;
@@ -71,7 +72,7 @@ public class TotalController {
                 news_page = pageNum - 1;
                 news_size = MAX_RECORD;
             }
-            List<Map<String, Object>> newsList = newsService.complexNewsSearch(keyword, false, news_page, news_size, si, bias);
+            List<Map<String, Object>> newsList = newsService.complexNewsSearch(keyword, false, news_page, news_size, si, bias, -1);
 
             long totalNum = si.getTotalNum();
             totalNum += (long)type1_2_num;

@@ -37,6 +37,14 @@ public class TeamBaseInfo {
 
     private String address;
 
+    public String getImgURL() {
+        return imgURL;
+    }
+
+    public void setImgURL(String imgURL) {
+        this.imgURL = imgURL;
+    }
+
     public int getId() {
         return id;
     }
