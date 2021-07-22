@@ -127,7 +127,7 @@ public class PlayerService {
                             //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.field.pinyin", kw).minimumShouldMatch("100%"),
                             //        ScoreFunctionBuilders.weightFactorFunction(200)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
-                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                                    ScoreFunctionBuilders.weightFactorFunction(800)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(500)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
@@ -138,11 +138,11 @@ public class PlayerService {
                 }
                 else{
                     qb = QueryBuilders.boolQuery()
-                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("70%"),
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(1000)))
                             //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.field.pinyin", kw).minimumShouldMatch("70%"),
                             //        ScoreFunctionBuilders.weightFactorFunction(300)))
-                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
+                            .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(1000)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("role", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(500)))
@@ -167,7 +167,7 @@ public class PlayerService {
                 newBoolQueryBuilder.should(qb);
             }
         }
-        boolQueryBuilder.must(newBoolQueryBuilder);
+        if(newBoolQueryBuilder!=null)boolQueryBuilder.must(newBoolQueryBuilder);
 
         if(_foot!=-1){
             boolQueryBuilder.filter(QueryBuilders.termQuery("foot", _foot));

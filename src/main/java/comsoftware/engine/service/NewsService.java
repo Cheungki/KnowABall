@@ -143,7 +143,7 @@ public class NewsService {
                 newBoolQueryBuilder.should(qb);
             }
         }
-        boolQueryBuilder.must(newBoolQueryBuilder);
+        if(newBoolQueryBuilder!=null)boolQueryBuilder.must(newBoolQueryBuilder);
         if(_sort!=-1){
             FieldSortBuilder timeSort = SortBuilders.fieldSort("time").order(SortOrder.DESC);
             searchSourceBuilder.sort(timeSort);
