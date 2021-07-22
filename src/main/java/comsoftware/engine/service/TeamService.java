@@ -102,7 +102,7 @@ public class TeamService {
                         //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("10%"),
                         //        ScoreFunctionBuilders.weightFactorFunction(300)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("80%"),
-                                ScoreFunctionBuilders.weightFactorFunction(1000)))
+                                ScoreFunctionBuilders.weightFactorFunction(800)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("80%"),
                                 ScoreFunctionBuilders.weightFactorFunction(500)))
                         .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("80%"),
@@ -123,7 +123,7 @@ public class TeamService {
                             //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("70%"),
                             //        ScoreFunctionBuilders.weightFactorFunction(1000)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("70%"),
-                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                                    ScoreFunctionBuilders.weightFactorFunction(800)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(500)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
@@ -155,7 +155,7 @@ public class TeamService {
                             //.should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("name.fields.pinyin", kw).minimumShouldMatch("100%"),
                             //        ScoreFunctionBuilders.weightFactorFunction(300)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("englishName", kw).minimumShouldMatch("100%"),
-                                    ScoreFunctionBuilders.weightFactorFunction(1000)))
+                                    ScoreFunctionBuilders.weightFactorFunction(800)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("stadium", kw).minimumShouldMatch("100%"),
                                     ScoreFunctionBuilders.weightFactorFunction(500)))
                             .should(QueryBuilders.functionScoreQuery(QueryBuilders.matchQuery("country", kw).minimumShouldMatch("100%"),
